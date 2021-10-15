@@ -21,7 +21,7 @@ $(TARGET): $(TARGET).cpp
 
 run:
 	@printf " --- Running executable ---\n\n"
-	@_build\$(TARGET)
+	@_build/$(TARGET)
 	@printf "\n\n --- DONE ---"
 
 clean:
