@@ -11,13 +11,11 @@ BUILD_DIR=_build
 CFLAGS = -g -Wall
 
 # linker flags:
-LFLAGS  = -I/usr/X11R6/include
-LFLAGS += -I/usr/X11R6/include/X11 
-LFLAGS += -L/usr/X11R6/lib 
-LFLAGS += -L/usr/X11R6/lib/X11
+LFLAGS  = -I/opt/x11/include 
+LFLAGS += -L/usr/x11/lib
 
 # additional flags:
-AFLAGS = -lX11
+AFLAGS = -lGL -lX11
 
 # the target to build
 TARGET = main
