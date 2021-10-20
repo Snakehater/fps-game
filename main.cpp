@@ -16,9 +16,12 @@
 #define FPS 30
 #define TEST_LOCAL
 
+int shutdown = 0;
+
 extern bool Initialize(int w, int h);
 extern bool Update(float deltaTime);
 extern void Render();
+extern void HandleKeyboardEvents( XEvent );
 extern void Resize(int w, int h);
 extern void Shutdown();
 
@@ -180,6 +183,8 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 
+	XSelectInput( display, window, PointerMotionMask | ButtonPressMask | ButtonReleaseMask | KeyPressMask );
+
 	// Show the window
 	XClearWindow(display, window);
 	XMapRaised(display, window);
@@ -194,7 +199,7 @@ int main(int argc, char** argv) {
 	long nextGameTick = (time.tv_sec * 1000) + (time.tv_usec / 1000);
 
 	// Enter message loop
-	while (true) {
+	while (shutdown != 1) {
 		if (XPending(display) > 0) {
 			XNextEvent(display, &ev);
 			if (ev.type == Expose) {
@@ -219,6 +224,7 @@ int main(int argc, char** argv) {
 		if (!Update((float)deltaTime)) {
 			break;
 		}
+		HandleKeyboardEvents( ev );
 		Render();
 
 		// Present frame
@@ -256,6 +262,34 @@ bool Update(float deltaTime) {
 	return true;
 }
 
+void HandleKeyboardEvents( XEvent ev ) {
+	int x, y;
+
+	switch ( ev.type ) {
+		case ButtonPress:
+			if ( ev.xbutton.button == 1 ) {
+				std::cout << "Left mouse down \n";
+			}
+			break;
+		case ButtonRelease:
+			if ( ev.xbutton.button == 1 ) {
+				std::cout << "Left mouse up \n";
+			}
+			break;
+		case KeyPress:
+			if ( ev.xkey.keycode == 9 ) { // ESC
+				Shutdown();
+			}
+			break;
+		case MotionNotify:
+			x = ev.xmotion.x;
+			y = ev.xmotion.y;
+			std::cout << "Mouse X:" << x << ", Y: " << y << "\n";
+			break;	
+	}
+	std::cout << "Trying?\n";
+}
+
 void Render() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
@@ -264,7 +298,7 @@ void Render() {
 		glVertex3f( 0.0f, -1.0f, 0.0f);
 		glColor3f(  0.0f,  1.0f, 0.0f);
 		glVertex3f(-1.0f,  1.0f, 0.0f);
-		glColor3f(  0.0f,  0.0f, 1.0f);
+		glColor3f(  1.0f,  0.0f, 1.0f);
 		glVertex3f( 1.0f,  1.0f, 0.0f);
 	glEnd();
 }
@@ -274,6 +308,6 @@ void Resize(int w, int h) {
 }
 
 void Shutdown() {
-
+	shutdown = 1;	
 }
 #endif
