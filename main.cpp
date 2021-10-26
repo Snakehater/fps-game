@@ -28,6 +28,16 @@ void Render( void );
 void HandleEvents( XEvent ev );
 void Resize( int w, int h );
 void Shutdown( void );
+void fill_triangle_buffer( void );
+
+struct triangle { 
+	float color[ 3 ];
+	float p1[ 3 ];
+	float p2[ 3 ];
+	float p3[ 3 ];
+}; 
+
+struct triangle triangles[2];
 
 static double GetMilliseconds() {
 	static timeval s_tTimeVal;
@@ -89,61 +99,11 @@ int main (int argc, char ** argv){
 		glClear (GL_COLOR_BUFFER_BIT);
 		glXSwapBuffers (dpy, win);
 
-		sleep(1);
-		for ( int i = 0; i < 200; i++ ) {	
-			glClearColor ( 0, 0.5, 1, 1 );
-			glClear( GL_COLOR_BUFFER_BIT );	
-			glBegin(GL_TRIANGLES);
-				glColor3f( 0.0f, 1.0f, 0.0f );
-				glVertex3f( 0.0f, 0.0f, 1.0f );
-				glVertex3f( 1.0f, 0.0f, 1.0f );
-				glVertex3f( 0.0f, 1.0f, 1.0f );
-			glEnd();
-			glFlush();
-			glXSwapBuffers( dpy, win );
+	
+	fill_triangle_buffer();
 
-
-			glClearColor ( 0, 0.5, 1, 1 );
-			glClear( GL_COLOR_BUFFER_BIT );	
-			glBegin(GL_TRIANGLES);
-				glColor3f( 0.0f, 1.0f, 0.0f );
-				glVertex3f( 0.0f, 0.0f, 1.0f );
-				glVertex3f( -1.0f, 0.0f, 1.0f );
-				glVertex3f( 0.0f, 1.0f, 1.0f );
-			glEnd();
-			glFlush();
-			glXSwapBuffers( dpy, win );
-
-			
-			glClearColor ( 0, 0.5, 1, 1 );
-			glClear( GL_COLOR_BUFFER_BIT );	
-			glBegin(GL_TRIANGLES);
-				glColor3f( 0.0f, 1.0f, 0.0f );
-				glVertex3f( 0.0f, 0.0f, 1.0f );
-				glVertex3f( -1.0f, 0.0f, 1.0f );
-				glVertex3f( 0.0f, -1.0f, 1.0f );
-			glEnd();
-			glFlush();
-			glXSwapBuffers( dpy, win );
-
-			
-			glClearColor ( 0, 0.5, 1, 1 );
-			glClear( GL_COLOR_BUFFER_BIT );	
-			glBegin(GL_TRIANGLES);
-				glColor3f( 0.0f, 1.0f, 0.0f );
-				glVertex3f( 0.0f, 0.0f, 1.0f );
-				glVertex3f( 1.0f, 0.0f, 1.0f );
-				glVertex3f( 0.0f, -1.0f, 1.0f );
-			glEnd();
-			glFlush();
-			glXSwapBuffers( dpy, win );
-		}
-		
-		glClearColor (1, 0.5, 0, 1);
-		glClear (GL_COLOR_BUFFER_BIT);
-		glXSwapBuffers (dpy, win);
-
-
+	// prepare gameloop
+	
 	double prevTime = GetMilliseconds();
 	double currentTime = GetMilliseconds();
 	double deltaTime = 0.0;
@@ -151,8 +111,7 @@ int main (int argc, char ** argv){
 	timeval time;
 	long sleepTime = 0;
 	gettimeofday(&time, NULL);
-	long nextGameTick = (time.tv_sec * 1000) + (time.tv_usec / 1000);
-
+	long nextGameTick = (time.tv_sec * 1000) + (time.tv_usec / 1000);	
 
 	while ( shutdown != 1 ) {
 		// Get events if there is any
@@ -194,6 +153,19 @@ int main (int argc, char ** argv){
 	glXDestroyContext(dpy, ctx); 
 }
 
+void fill_triangle_buffer( void ){
+	triangles[ 0 ] = {   
+				{  1.0f,  0.0f, 0.0f },
+				{ -0.5f, -0.5f, 0.0f },
+				{  0.5f, -0.5f, 0.0f },
+				{ -0.5f,  0.5f, 0.0f }  };
+	
+	triangles[ 1 ] = {   
+				{  0.0f,  0.0f, 1.0f },
+				{  0.5f, -0.5f, 0.0f },
+				{  0.5f,  0.5f, 0.0f },
+				{ -0.5f,  0.5f, 0.0f } };
+}
 
 void Resize(int w, int h) {
 	glViewport(0, 0, w, h);
@@ -203,15 +175,29 @@ void Shutdown() {
 	shutdown = 1;	
 }
 
-void Render( void ) {
 
-	glClearColor ( 0, 0.5, 1, 1 );
+void Render( void ) {
+	glClearColor ( 1.0f, 1.0f, 1.0f, 1 );
 	glClear( GL_COLOR_BUFFER_BIT );	
 	glBegin(GL_TRIANGLES);
-		glColor3f( 0.0f, 1.0f, 0.0f );
-		glVertex3f( 0.0f, 0.0f, 1.0f );
+		/*glColor3f( 0.0f, 1.0f, 0.0f );
+		glVertex3f( test_cnt, 0.0f, 1.0f );
 		glVertex3f( 1.0f, 0.0f, 1.0f );
 		glVertex3f( 0.0f, -1.0f, 1.0f );
+		*/
+
+	int numTriangles = sizeof(triangles)/sizeof(triangles[0]);
+	for ( int i = 0; i < numTriangles; i++ ) {
+	glClear( GL_COLOR_BUFFER_BIT );	
+	glBegin(GL_TRIANGLES);
+		struct triangle tr = triangles[ i ];
+		glColor3f( tr.color[ 0 ], tr.color[ 1 ], tr.color[ 2 ] );
+		glVertex3f( tr.p1[ 0 ], tr.p1[ 1 ], tr.p1[ 1 ] );
+		glVertex3f( tr.p2[ 0 ], tr.p2[ 1 ], tr.p2[ 1 ] );
+		glVertex3f( tr.p3[ 0 ], tr.p3[ 1 ], tr.p3[ 1 ] );
+	}
+
+
 	glEnd();
 	glFlush();
 
