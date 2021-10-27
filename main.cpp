@@ -37,7 +37,7 @@ struct triangle {
 	float p3[ 3 ];
 }; 
 
-struct triangle triangles[2];
+struct triangle triangles[ 12 ];
 
 static double GetMilliseconds() {
 	static timeval s_tTimeVal;
@@ -91,10 +91,12 @@ int main (int argc, char ** argv){
 
 	GLXContext ctx = glXCreateContextAttribsARB(dpy, *fbc, 0, true, attribs);
 
-	glXMakeCurrent (dpy, win, ctx);
+	glXMakeCurrent( dpy, win, ctx );
 	glMatrixMode( GL_PROJECTION );
-    	glOrtho( -1, 1, 1, -1, -1, 1 );
-
+	glEnable( GL_CULL_FACE ); 
+	glCullFace( GL_FRONT );
+    	glFrustum( -1, 1, 1, -1, -1, 1 );
+	
 		glClearColor (0, 0.5, 1, 1);
 		glClear (GL_COLOR_BUFFER_BIT);
 		glXSwapBuffers (dpy, win);
@@ -155,16 +157,65 @@ int main (int argc, char ** argv){
 
 void fill_triangle_buffer( void ){
 	triangles[ 0 ] = {   
-				{  1.0f,  0.0f, 0.0f },
-				{ -0.5f, -0.5f, 0.0f },
-				{  0.5f, -0.5f, 0.0f },
-				{ -0.5f,  0.5f, 0.0f }  };
-	
+				{  1.0f,  0.0f,  0.0f },
+				{ -0.5f, -0.5f, -0.5f },
+				{  0.5f,  0.5f, -0.5f },
+				{  0.5f, -0.5f, -0.5f }  };
 	triangles[ 1 ] = {   
-				{  0.0f,  0.0f, 1.0f },
-				{  0.5f, -0.5f, 0.0f },
-				{  0.5f,  0.5f, 0.0f },
-				{ -0.5f,  0.5f, 0.0f } };
+				{  0.0f,  0.0f,  1.0f },
+				{ -0.5f, -0.5f, -0.5f },
+				{ -0.5f,  0.5f, -0.5f },
+				{  0.5f,  0.5f, -0.5f } };
+	triangles[ 2 ] = {   
+				{  0.0f,  0.0f,  1.0f },
+				{  0.5f,  0.5f, -0.5f },
+				{  0.5f, -0.5f,  0.5f },
+				{  0.5f, -0.5f, -0.5f }  };
+	triangles[ 3 ] = {   
+				{  1.0f,  1.0f,  0.0f },
+				{  0.5f,  0.5f, -0.5f },
+				{  0.5f,  0.5f,  0.5f },
+				{  0.5f, -0.5f,  0.5f } };
+	triangles[ 4 ] = {   
+				{  1.0f,  0.0f,  0.0f },
+				{ -0.5f, -0.5f,  0.5f },
+				{  0.5f, -0.5f,  0.5f },
+				{ -0.5f,  0.5f,  0.5f }  };
+	triangles[ 5 ] = {   
+				{  0.0f,  0.0f,  1.0f },
+				{  0.5f, -0.5f,  0.5f },
+				{  0.5f,  0.5f,  0.5f },
+				{ -0.5f,  0.5f,  0.5f } };
+	triangles[ 6 ] = {   
+				{  0.0f,  0.0f,  1.0f },
+				{ -0.5f,  0.5f, -0.5f },
+				{ -0.5f, -0.5f,  0.5f },
+				{ -0.5f,  0.5f,  0.5f }  };
+	triangles[ 7 ] = {   
+				{  1.0f,  1.0f,  0.0f },
+				{ -0.5f,  0.5f, -0.5f },
+				{ -0.5f, -0.5f, -0.5f },
+				{ -0.5f, -0.5f,  0.5f } };
+	triangles[ 8 ] = {   
+				{  1.0f,  0.0f,  0.0f },
+				{ -0.5f,  0.5f, -0.5f },
+				{ -0.5f,  0.5f,  0.5f },
+				{  0.5f,  0.5f,  0.5f }  };
+	triangles[ 9 ] = {   
+				{  0.0f,  0.0f,  1.0f },
+				{ -0.5f,  0.5f, -0.5f },
+				{  0.5f,  0.5f,  0.5f },
+				{  0.5f,  0.5f, -0.5f } };
+	triangles[ 10 ] = {   
+				{  0.0f,  0.0f,  1.0f },
+				{  0.5f, -0.5f, -0.5f },
+				{  0.5f, -0.5f,  0.5f },
+				{ -0.5f, -0.5f,  0.5f }  };
+	triangles[ 11 ] = {   
+				{  1.0f,  1.0f,  0.0f },
+				{  0.5f, -0.5f, -0.5f },
+				{ -0.5f, -0.5f,  0.5f },
+				{ -0.5f, -0.5f, -0.5f } };
 }
 
 void Resize(int w, int h) {
@@ -192,9 +243,9 @@ void Render( void ) {
 	glBegin(GL_TRIANGLES);
 		struct triangle tr = triangles[ i ];
 		glColor3f( tr.color[ 0 ], tr.color[ 1 ], tr.color[ 2 ] );
-		glVertex3f( tr.p1[ 0 ], tr.p1[ 1 ], tr.p1[ 1 ] );
-		glVertex3f( tr.p2[ 0 ], tr.p2[ 1 ], tr.p2[ 1 ] );
-		glVertex3f( tr.p3[ 0 ], tr.p3[ 1 ], tr.p3[ 1 ] );
+		glVertex3f( tr.p1[ 0 ], tr.p1[ 1 ], tr.p1[ 2 ] );
+		glVertex3f( tr.p2[ 0 ], tr.p2[ 1 ], tr.p2[ 2 ] );
+		glVertex3f( tr.p3[ 0 ], tr.p3[ 1 ], tr.p3[ 2 ] );
 	}
 
 
@@ -203,6 +254,11 @@ void Render( void ) {
 
 }
 
+float dx, dy;
+float prevx, prevy;
+uint8_t prev_defined = 0;
+uint8_t key_down = 0;
+
 void HandleEvents( XEvent ev ) {
 	int x, y;
 
@@ -210,11 +266,16 @@ void HandleEvents( XEvent ev ) {
 		case ButtonPress:
 			if ( ev.xbutton.button == 1 ) {
 				std::cout << "Left mouse down \n";
+    				// glRotatef( 0.01, 0.0, 0.0, 1.0 );
+				if ( key_down == 0 )
+					prev_defined = 0;
+				key_down = 1;
 			}
 			break;
 		case ButtonRelease:
 			if ( ev.xbutton.button == 1 ) {
 				std::cout << "Left mouse up \n";
+				key_down = 0;
 			}
 			break;
 		case KeyPress:
@@ -225,6 +286,24 @@ void HandleEvents( XEvent ev ) {
 		case MotionNotify:
 			x = ev.xmotion.x;
 			y = ev.xmotion.y;
+			if ( key_down == 0 )
+				break;
+			if ( !prev_defined ) {
+				prevx = x;
+				prevy = y;
+				prev_defined = 1;
+				break;
+			}
+			
+			dx = x - prevx;
+			dy = y - prevy;
+
+			prevx = x;
+			prevy = y;
+
+			glRotatef( -dy/10, 1.0f, 0.0f, 0.0f );
+			glRotatef( -dx/10, 0.0f, 1.0f, 0.0f );
+			
 			//std::cout << "Mouse X:" << x << ", Y: " << y << "\n";
 			break;	
 	}
