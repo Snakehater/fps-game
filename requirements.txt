@@ -1,0 +1,3 @@
+libgl-dev
+libglx-dev
+libx11-dev
