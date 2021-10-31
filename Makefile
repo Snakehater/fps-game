@@ -13,18 +13,19 @@ CFLAGS = -g -Wall
 # linker flags:
 LFLAGS  = -I/opt/x11/include 
 LFLAGS += -L/usr/x11/lib
+LFLAGS += -I./include
 
 # additional flags:
-AFLAGS = -lGL -lX11
+AFLAGS = -lglfw -lGLEW -lGL -lX11
 
 # the target to build
 TARGET = main
 
 all: $(TARGET)
 
-$(TARGET): $(TARGET).cpp
+$(TARGET): src/$(TARGET).cpp
 	[ -d $(BUILD_DIR) ] || mkdir $(BUILD_DIR)
-	$(CC) $(CFLAGS) -o $(BUILD_DIR)/$(TARGET) $(TARGET).cpp $(LFLAGS) $(AFLAGS)
+	$(CC) $(CFLAGS) -o $(BUILD_DIR)/$(TARGET) src/$(TARGET).cpp $(LFLAGS) $(AFLAGS)
 
 run:
 	@printf " --- Running executable ---\n\n"
