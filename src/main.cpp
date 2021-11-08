@@ -110,6 +110,7 @@ GLuint loadBMP_custom( const char * imagepath ) {
 }
 
 bool load_shaders(GLuint &program){
+	bool load_success = true;
 	char info_log[512];
 	GLint success;
 
@@ -124,8 +125,10 @@ bool load_shaders(GLuint &program){
 	if( in_file.is_open() ) {
 		while ( std::getline( in_file, temp) )
 			src += temp + "\n";
-	} else
+	} else {
 		std::cout << "ERROR::SHADERS:COULD_NOT_OPEN_VERTEX" << std::endl;
+		load_success = false;
+	}
 	
 	in_file.close();
 	
@@ -140,6 +143,7 @@ bool load_shaders(GLuint &program){
 		glGetShaderInfoLog( vertexShader, 512, NULL, info_log );
 		std::cout << "ERROR::SHADERS::COULD_NOT_COMPILE_VERTEX" << std::endl;
 		std::cout << info_log << std::endl;
+		load_success = false;
 	}
 	temp = "";
 	src = "";
@@ -150,8 +154,10 @@ bool load_shaders(GLuint &program){
 	if( in_file.is_open() ) {
 		while ( std::getline( in_file, temp) )
 			src += temp + "\n";
-	} else
+	} else {
 		std::cout << "ERROR::SHADERS:COULD_NOT_OPEN_FRAGMENT" << std::endl;
+		load_success = false;
+	}
 	
 	in_file.close();
 	
@@ -166,11 +172,32 @@ bool load_shaders(GLuint &program){
 		glGetShaderInfoLog( fragmentShader, 512, NULL, info_log );
 		std::cout << "ERROR::SHADERS::COULD_NOT_COMPILE_FRAGMENT" << std::endl;
 		std::cout << info_log << std::endl;
+		load_success = false;
 	}
 	temp = "";
 	src = "";
 
 	// Program
+	program = glCreateProgram();
+	
+	glAttachShader( program, vertexShader );
+	glAttachShader( program, fragmentShader );
+
+	glLinkProgram( program );
+
+	glGetProgramiv( program, GL_LINK_STATUS, &success );
+	if ( !success ) {
+		glGetProgramInfoLog( program, 512, NULL, info_log );
+		std::cout << "ERROR::LOADSHADERS::COULD_NOT_LINK_PROGRAM" << std::endl;
+		std::cout << info_log << std::endl;
+		load_success = false;
+	}
+
+	// End
+	glUseProgram( 0 );
+	glDeleteShader( vertexShader );
+	glDeleteShader( fragmentShader );
+	return load_success;
 }
 
 int main (int argc, char ** argv){
