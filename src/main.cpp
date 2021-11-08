@@ -119,13 +119,13 @@ bool load_shaders(GLuint &program){
 	std::ifstream in_file;
 
 	// Vertex
-	in_file.open( "vertex_core.glsl" );
+	in_file.open( "shaders/vertex_core.glsl" );
 
 	if( in_file.is_open() ) {
 		while ( std::getline( in_file, temp) )
 			src += temp + "\n";
 	} else
-		std::cout << "ERROR::SHADERS:COULD_NOT_OPEN_VERTEX";
+		std::cout << "ERROR::SHADERS:COULD_NOT_OPEN_VERTEX" << std::endl;
 	
 	in_file.close();
 	
@@ -135,6 +135,12 @@ bool load_shaders(GLuint &program){
 	glShaderSource( vertexShader, 1, &vertSrc, NULL );
 	glCompileShader( vertexShader );
 	
+	glGetShaderiv( vertexShader, GL_COMPILE_STATUS, &success );
+	if ( !success ) {
+		glGetShaderInfoLog( vertexShader, 512, NULL, info_log );
+		std::cout << "ERROR::SHADERS::COULD_NOT_COMPILE_VERTEX" << std::endl;
+		std::cout << info_log << std::endl;
+	}
 	temp = "";
 	src = "";
 
