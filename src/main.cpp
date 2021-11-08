@@ -1,13 +1,4 @@
-#include <iostream>
-
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-#include <X11/keysymdef.h>
-
-#include <GL/glx.h>
-#include <GL/gl.h>
-// #include <GL/glut.h>	
-// #include <GL/glu.h>
+#include "main.hpp"
 
 #include <sys/time.h>
 #include <unistd.h>
@@ -118,6 +109,39 @@ GLuint loadBMP_custom( const char * imagepath ) {
 	return textureID;
 }
 
+bool load_shaders(GLuint &program){
+	char info_log[512];
+	GLint success;
+
+	std::string temp = "";
+	std::string src = "";
+	
+	std::ifstream in_file;
+
+	// Vertex
+	in_file.open( "vertex_core.glsl" );
+
+	if( in_file.is_open() ) {
+		while ( std::getline( in_file, temp) )
+			src += temp + "\n";
+	} else
+		std::cout << "ERROR::SHADERS:COULD_NOT_OPEN_VERTEX";
+	
+	in_file.close();
+	
+	GLuint vertexShader = glCreateShader( GL_VERTEX_SHADER ); // error??
+	
+	const GLchar* vertSrc = src.c_str();
+	glShaderSource( vertexShader, 1, &vertSrc, NULL );
+	glCompileShader( vertexShader );
+	
+	temp = "";
+	src = "";
+
+	// Fragment
+
+	// Program
+}
 
 int main (int argc, char ** argv){
 	Display *dpy = XOpenDisplay(0);
@@ -174,6 +198,17 @@ int main (int argc, char ** argv){
 
 	
 	fill_triangle_buffer();
+
+	// GLEW init
+	GLenum err = glewInit();
+	if (err != GLEW_OK)
+		exit(1); // or handle the error in a nicer way
+	if (!GLEW_VERSION_2_1)  // check that the machine supports the 2.1 API.
+		exit(1); // or handle the error in a nicer way
+
+	// Load shaders
+	GLuint core_program;
+	load_shaders( core_program );
 
 	// Load and bind texture
 	glEnable(GL_TEXTURE_2D);

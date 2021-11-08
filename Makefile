@@ -13,10 +13,10 @@ CFLAGS = -g -Wall
 # linker flags:
 LFLAGS  = -I/opt/x11/include 
 LFLAGS += -L/usr/x11/lib
-LFLAGS += -I./include
+LFLAGS += -I./inc
 
 # additional flags:
-AFLAGS = -lglfw -lGLEW -lGL -lX11
+AFLAGS = -lGLEW -lGL -lX11
 
 # the target to build
 TARGET = main

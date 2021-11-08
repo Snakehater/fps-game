@@ -1,1 +1,4 @@
-libsdl1.2-dev
+libglfw3
+libglfw3-dev
+libglm-dev
+glew-utils
