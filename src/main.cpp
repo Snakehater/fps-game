@@ -129,7 +129,7 @@ bool load_shaders(GLuint &program){
 	
 	in_file.close();
 	
-	GLuint vertexShader = glCreateShader( GL_VERTEX_SHADER ); // error??
+	GLuint vertexShader = glCreateShader( GL_VERTEX_SHADER );
 	
 	const GLchar* vertSrc = src.c_str();
 	glShaderSource( vertexShader, 1, &vertSrc, NULL );
@@ -145,6 +145,30 @@ bool load_shaders(GLuint &program){
 	src = "";
 
 	// Fragment
+	in_file.open( "shaders/fragment_core.glsl" );
+
+	if( in_file.is_open() ) {
+		while ( std::getline( in_file, temp) )
+			src += temp + "\n";
+	} else
+		std::cout << "ERROR::SHADERS:COULD_NOT_OPEN_FRAGMENT" << std::endl;
+	
+	in_file.close();
+	
+	GLuint fragmentShader = glCreateShader( GL_FRAGMENT_SHADER ); 
+	
+	const GLchar* fragSrc = src.c_str();
+	glShaderSource( fragmentShader, 1, &fragSrc, NULL );
+	glCompileShader( fragmentShader );
+	
+	glGetShaderiv( fragmentShader, GL_COMPILE_STATUS, &success );
+	if ( !success ) {
+		glGetShaderInfoLog( fragmentShader, 512, NULL, info_log );
+		std::cout << "ERROR::SHADERS::COULD_NOT_COMPILE_FRAGMENT" << std::endl;
+		std::cout << info_log << std::endl;
+	}
+	temp = "";
+	src = "";
 
 	// Program
 }
