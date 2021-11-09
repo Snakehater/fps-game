@@ -3,13 +3,17 @@
 #include <string>
 #include <vector>
 
-#include <GL/glew.h>
-#include <GL/glut.h>
+//#include <GL/glew.h>
+//#include <GL/glut.h>
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/keysymdef.h>
 
-#include <GL/glx.h>
+#include <glad/glad.h> 
+#include <GLFW/glfw3.h>
+
+//#include <GL/glx.h>
 
 // math functions
 #include <glm/glm.hpp>

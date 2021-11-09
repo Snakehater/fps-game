@@ -16,7 +16,10 @@ LFLAGS += -L/usr/x11/lib
 LFLAGS += -I./inc
 
 # additional flags:
-AFLAGS = -lGLEW -lGL -lX11
+AFLAGS = -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl
+
+# additional src files
+CFILES = src/glad.c
 
 # the target to build
 TARGET = main
@@ -25,7 +28,7 @@ all: $(TARGET)
 
 $(TARGET): src/$(TARGET).cpp
 	[ -d $(BUILD_DIR) ] || mkdir $(BUILD_DIR)
-	$(CC) $(CFLAGS) -o $(BUILD_DIR)/$(TARGET) src/$(TARGET).cpp $(LFLAGS) $(AFLAGS)
+	$(CC) $(CFLAGS) -o $(BUILD_DIR)/$(TARGET) src/$(TARGET).cpp $(CFILES) $(LFLAGS) $(AFLAGS)
 
 run:
 	@printf " --- Running executable ---\n\n"
