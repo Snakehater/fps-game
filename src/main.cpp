@@ -10,18 +10,26 @@ float vertices[] = {
      0.0f,  0.5f, 0.0f
 };  
 
-const char *vertexShaderSource = "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\0";
-const char *fragmentShaderSource = "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}\n\0";
+std::string load_shader_src( const char *path ) {
+	std::string temp = "";
+	std::string src = "";
+	
+	std::ifstream in_file;
+
+	// Vertex
+	in_file.open( path );
+
+	if( in_file.is_open() ) {
+		while ( std::getline( in_file, temp) )
+			src += temp + "\n";
+	} else {
+		std::cout << "ERROR::SHADERS:COULD_NOT_OPEN::" << path << std::endl;
+	}
+	
+	in_file.close();
+	
+	return src.c_str();
+}
 
 int main() {
 	// instantiate the GLFW window
@@ -54,6 +62,13 @@ int main() {
 
 	// build and compile our shader program
 	// ------------------------------------
+	// we first try to load shaders from files
+	std::string vertexSrc = load_shader_src( "shaders/vertex_core.glsl" );
+	std::string fragmentSrc = load_shader_src( "shaders/fragment_core.glsl" );
+
+	const char *vertexShaderSource = vertexSrc.c_str();
+	const char *fragmentShaderSource = fragmentSrc.c_str();
+
 	// vertex shader
 	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
@@ -112,6 +127,7 @@ int main() {
 	// bind the Vertex Array Object first, then bind and set vertex buffer(s), and then configure vertex attributes(s).
 	glBindVertexArray(VAO);
 
+	// bind buffer and store vertices on graphics card
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
 
