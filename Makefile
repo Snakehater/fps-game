@@ -16,7 +16,7 @@ LFLAGS += -L/usr/x11/lib
 LFLAGS += -I./inc
 
 # additional flags:
-AFLAGS = -lglfw -lGL -lX11 -lpthread -lXrandr -lXi -ldl
+AFLAGS = -lglfw -lGL -lX11 -lpthread -lXrandr -ldl
 
 # additional src files
 CFILES = src/glad.c

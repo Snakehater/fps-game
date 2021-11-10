@@ -2,3 +2,5 @@ libglfw3
 libglfw3-dev
 libglm-dev
 glew-utils
+make
+g++
