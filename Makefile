@@ -33,7 +33,7 @@ $(TARGET): src/$(TARGET).cpp
 run:
 	@printf " --- Running executable ---\n\n"
 	@_build/$(TARGET)
-	@printf "\n\n --- DONE ---"
+	@printf "\n\n --- DONE ---\n"
 
 clean:
 	$(RM) _build
