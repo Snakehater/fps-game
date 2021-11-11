@@ -10,27 +10,6 @@ float vertices[] = {
      0.0f,  0.5f, 0.0f
 };  
 
-std::string load_shader_src( const char *path ) {
-	std::string temp = "";
-	std::string src = "";
-	
-	std::ifstream in_file;
-
-	// Vertex
-	in_file.open( path );
-
-	if( in_file.is_open() ) {
-		while ( std::getline( in_file, temp) )
-			src += temp + "\n";
-	} else {
-		std::cout << "ERROR::SHADERS:COULD_NOT_OPEN::" << path << std::endl;
-	}
-	
-	in_file.close();
-	
-	return src.c_str();
-}
-
 int main() {
 	// instantiate the GLFW window
 	glfwInit();
@@ -63,55 +42,15 @@ int main() {
 	// build and compile our shader program
 	// ------------------------------------
 	// we first try to load shaders from files
-	std::string vertexSrc = load_shader_src( "shaders/vertex_core.glsl" );
-	std::string fragmentSrc = load_shader_src( "shaders/fragment_core.glsl" );
-
-	const char *vertexShaderSource = vertexSrc.c_str();
-	const char *fragmentShaderSource = fragmentSrc.c_str();
-
-	// vertex shader
-	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-	glCompileShader(vertexShader);
-	// check for shader compile errors
-	int success;
-	char infoLog[512];
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-	if (!success) {
-		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-	// fragment shader
-	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-	glCompileShader(fragmentShader);
-	// check for shader compile errors
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-	if (!success){
-		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
-	}
-	// link shaders
-	unsigned int shaderProgram = glCreateProgram();
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
-	// check for linking errors
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-	if (!success) {
-		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-		std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-	}
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-
+	Shader ourShader( "shaders/vertex_core.glsl", "shaders/fragment_core.glsl" );
+	
 	// set up vertex data (and buffer(s)) and configure vertex attributes
 	// ------------------------------------------------------------------
 	float vertices[] = {
-		 0.5f,  0.5f, 0.0f,  // top right
-		 0.5f, -0.5f, 0.0f,  // bottom right
-		-0.5f, -0.5f, 0.0f,  // bottom left
-		-0.5f,  0.5f, 0.0f   // top left 
+		 0.5f,  0.5f, 0.0f, 1.0f, 0.5f, 0.0f, // top right
+		 0.5f, -0.5f, 0.0f, 0.5f, 0.5f, 1.0f, // bottom right
+		-0.5f, -0.5f, 0.0f, 0.0f, 1.5f, 0.0f, // bottom left
+		-0.5f,  0.5f, 0.0f, 1.0f, 0.5f, 1.0f  // top left 
 	};
 	unsigned int indices[] = {  // note that we start from 0!
 		0, 1, 3,  // first Triangle
@@ -137,8 +76,12 @@ int main() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
 	// 4. then set the vertex attributes pointers
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	// position attribute
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
+	// color attribute
+	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(float), (void*)(3* sizeof(float)));
+	glEnableVertexAttribArray(1);
 
 	// note that this is allowed, the call to glVertexAttribPointer registered VBO as the vertex attribute's bound vertex buffer object so afterwards we can safely unbind
 	glBindBuffer(GL_ARRAY_BUFFER, 0); 
@@ -166,8 +109,10 @@ int main() {
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		// draw our first triangle
-		glUseProgram(shaderProgram);
+		// be sure to activate the shader
+		ourShader.use();
+		
+		// render triangles
 		glBindVertexArray(VAO); // seeing as we only have a single VAO there's no need to bind it every time, but we'll do so to keep things a bit more organized
 		//glDrawArrays(GL_TRIANGLES, 0, 6);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
