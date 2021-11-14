@@ -60,6 +60,7 @@ public:
 
 	// returns the view matrix calculated using Euler Angles and the LookAt Matrix
 	glm::mat4 GetViewMatrix() {
+		// lookAt returns a view matrix used in caller function. it needs the camera position, a target position and a vector taht represents the up vector in world space, the up vector is used for calculating the right vector for the camera
 		return glm::lookAt(position, position + front, up);
 	}
 
