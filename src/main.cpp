@@ -215,7 +215,7 @@ int main() {
 
 		// prep projection matrix since we don't need to set a new one every time
 		//					      FOV		aspect ratio		 near far clipping distance
-		glm::mat4 projection = glm::perspective( glm::radians( camera.Zoom ), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f );
+		glm::mat4 projection = glm::perspective( glm::radians( camera.zoom ), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f );
 		ourShader.setMat4( "projection", projection );
 		
 
