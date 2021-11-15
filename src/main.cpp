@@ -20,6 +20,9 @@ bool firstMouse = true;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
+// meshes
+Mesh mesh("res/objects/cube.obj");
+
 int main() {
 	// instantiate the GLFW window
 	glfwInit();
@@ -68,7 +71,7 @@ int main() {
 	
 	// set up vertex data (and buffer(s)) and configure vertex attributes
 	// ------------------------------------------------------------------
-	float vertices[] = {
+	/*float vertices[] = {
 		// positions x,y,z    // texture coords u,v
 		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
@@ -111,10 +114,10 @@ int main() {
 		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
 		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
 		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-	};
+	};*/
 	// world space positions of our cubes
 	glm::vec3 cubePositions[] = {
-		glm::vec3( 0.0f,  0.0f,  0.0f),
+	/*	glm::vec3( 0.0f,  0.0f,  0.0f),
 		glm::vec3( 2.0f,  5.0f, -15.0f),
 		glm::vec3(-1.5f, -2.2f, -2.5f),
 		glm::vec3(-3.8f, -2.0f, -12.3f),
@@ -123,8 +126,11 @@ int main() {
 		glm::vec3( 1.3f, -2.0f, -2.5f),
 		glm::vec3( 1.5f,  2.0f, -2.5f),
 		glm::vec3( 1.5f,  0.2f, -1.5f),
-		glm::vec3(-1.3f,  1.0f, -1.5f)
+	*/	glm::vec3(-1.3f,  1.0f, -1.5f)
 	};
+
+	float* vertices2 = &mesh.vertex_array_object[0];
+
 	// vertex buffer objects (VBO) 
 	// vertex array object (VAO)
 	// element buffer object (EBO)
@@ -139,7 +145,8 @@ int main() {
 	// 2. copy our vertices array in a vertex buffer for OpenGL to use
 	// bind buffer and store vertices on graphics card
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	// glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*mesh.vertex_array_object.size(), vertices2, GL_STATIC_DRAW);
 	// (removed) 3. copy our index array in a element buffer for OpenGL to use
 	
 	// 4. then set the vertex attributes pointers

@@ -105,8 +105,6 @@ public:
 
 		// update front, right and up Vectors using the updated Euler angles
 		updateCameraVectors();
-
-		std::cout << cam_front.x << ' ' << cam_front.y << ' ' << cam_front.z << std::endl;
 	}
 
 	// processes input received from a mouse scroll-wheel event. Only requires input on the vertical wheel-axis
