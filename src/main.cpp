@@ -29,6 +29,11 @@ int main() {
 #ifdef __APPLE__
 	glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
 #endif
+	
+	int major, minor, rev;
+	glfwGetVersion(&major, &minor, &rev);
+	std::cout << "GLFW v" << major << '.' << minor << '.' << rev << std::endl;
+	std::cout << glfwGetVersionString() << std::endl;
 
 	// create a window object
 	GLFWwindow* window = glfwCreateWindow(800, 600, "RicochetRobots", NULL, NULL);
