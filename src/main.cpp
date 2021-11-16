@@ -21,7 +21,7 @@ float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
 // meshes
-Mesh mesh("res/objects/cube.obj");
+Mesh mesh("res/objects/monke.obj");
 
 int main() {
 	// instantiate the GLFW window
@@ -246,7 +246,7 @@ int main() {
 			model = glm::rotate( model, glm::radians( angle ), glm::vec3( 1.0f, 0.3f, 0.5f ) );
 			ourShader.setMat4( "model", model );
 			
-			glDrawArrays( GL_TRIANGLES, 0, 36 );
+			glDrawArrays( GL_TRIANGLES, 0, mesh.get_vsize() );
 		}
 		
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
