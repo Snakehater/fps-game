@@ -238,7 +238,7 @@ int main() {
 		
 		// render boxes
 		glBindVertexArray( VAO );
-		for ( uint8_t i = 0; i < 10; i++ ) {
+		for ( uint8_t i = 0; i < 1; i++ ) {
 			// calculate the model matrix for each object and pass it to shader before drawing
 			glm::mat4 model = glm::mat4( 1.0f );
 			model = glm::translate( model, cubePositions[ i ] );

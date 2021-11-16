@@ -33,12 +33,18 @@ class Mesh
 		output.push_back(s);
 		return output;
 	}
-	
+	float vsize;
+	float scale;
 public:
+	float get_vsize(){
+		return this->vsize;
+	}
 	std::vector<float> vertex_array_object;
 	
-	Mesh(const char *filename) {
+	Mesh(const char *filename, float scale_in = 1.0f) {
+		this->scale = scale_in;
 		readfile(filename, &vertex_array_object);
+		this->vsize = vertex_array_object.size();
 	}
 	void readfile(const char* filename, std::vector<float>* output);
 };
@@ -56,12 +62,12 @@ void Mesh::readfile(const char *filename, std::vector<float>* output) {
 		if (strcmp(ctrl_id, "v ") == 0) {
 			vertex v;
 			std::vector<std::string> vertex_raw = this->split(tmp, " ");
-			v.x = std::stof(vertex_raw[1]);
-			v.y = std::stof(vertex_raw[2]);
-			v.z = std::stof(vertex_raw[3]);
+			v.x = std::stof(vertex_raw[1]) * scale;
+			v.y = std::stof(vertex_raw[2]) * scale;
+			v.z = std::stof(vertex_raw[3]) * scale;
 			std::cout << v.x << ' ' << v.y << ' ' << v.z << std::endl;
 			vertices.push_back(v);
-		} else if (strcmp(ctrl_id, "vn") == 0) {
+		} else if (strcmp(ctrl_id, "vt") == 0) {
 			uv u;
 			std::vector<std::string> uv_raw = this->split(tmp, " ");
 			u.u = std::stof(uv_raw[1]);
@@ -80,24 +86,24 @@ void Mesh::readfile(const char *filename, std::vector<float>* output) {
 			uv failsafe;
 			failsafe.u = 0; failsafe.v = 0;
 			// prep for output
-			vertex va = vertices[std::stoi(f.a[0])];
+			vertex va = vertices[std::stoi(f.a[0]) - 1];
 			uv ua;
 			if (f.a.size() > 1)
-				ua = uvs[std::stoi(f.a[1])];
+				ua = uvs[std::stoi(f.a[1]) - 1];
 			else
 				ua = failsafe;
 
-			vertex vb = vertices[std::stoi(f.b[0])];
+			vertex vb = vertices[std::stoi(f.b[0]) - 1];
 			uv ub;
 			if (f.b.size() > 1)
-				ub = uvs[std::stoi(f.b[1])];
+				ub = uvs[std::stoi(f.b[1]) - 1];
 			else
 				ub = failsafe;
 			
-			vertex vc = vertices[std::stoi(f.c[0])];
+			vertex vc = vertices[std::stoi(f.c[0]) - 1];
 			uv uc;
 			if (f.c.size() > 1)
-				uc = uvs[std::stoi(f.c[1])];
+				uc = uvs[std::stoi(f.c[1]) - 1];
 			else
 				uc = failsafe;
 			// load data into output  -- each stride consists of 5 floats, x y z u v, is the format, vertex three and textcoord 2
