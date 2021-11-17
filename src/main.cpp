@@ -116,17 +116,25 @@ int main() {
 		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
 	};*/
 	// world space positions of our cubes
-	glm::vec3 cubePositions[] = {
-		glm::vec3( 0.0f,  0.0f,  0.0f),
-		glm::vec3( 1.0f,  0.0f,  0.0f),
-		glm::vec3( 2.0f,  0.0f,  0.0f),
-		glm::vec3( 3.0f,  0.0f,  0.0f),
-		glm::vec3( 4.0f,  0.0f,  0.0f),
-		glm::vec3( 5.0f,  0.0f,  0.0f),
-		glm::vec3( 6.0f,  0.0f,  0.0f),
-		glm::vec3( 7.0f,  0.0f,  0.0f),
-		glm::vec3( 8.0f,  0.0f,  0.0f),
-		glm::vec3( 9.0f,  0.0f,  0.0f)
+	int board_map_size = 16;
+	float board_map[board_map_size][board_map_size] = {
+		{0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1},
+		{1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		{1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1},
+		{1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1},
+		{1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1},
+		{1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1},
+		{1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1},
+		{1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1},
+		{1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1},
+		{1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		{1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1},
+		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		{1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1},
+		{1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1},
+		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+
 	};
 
 	float* vertices2 = &mesh.vertex_array_object[0];
@@ -238,15 +246,19 @@ int main() {
 		
 		// render boxes
 		glBindVertexArray( VAO );
-		for ( uint8_t i = 0; i < 10; i++ ) {
-			// calculate the model matrix for each object and pass it to shader before drawing
-			glm::mat4 model = glm::mat4( 1.0f );
-			model = glm::translate( model, cubePositions[ i ] );
-			//float angle = ( 20.0f * i ) + glfwGetTime();
-			model = glm::rotate( model, glm::radians( 0.0f ), glm::vec3( 1.0f, 1.0f, 1.0f ) );
-			ourShader.setMat4( "model", model );
-			
-			glDrawArrays( GL_TRIANGLES, 0, mesh.get_vsize() );
+		for (uint8_t i = 0; i < board_map_size; i++) {
+			for (uint8_t j = 0; j < board_map_size; j++) {
+				if (board_map[i][j] == 1) {
+					// calculate the model matrix for each object and pass it to shader before drawing
+					glm::mat4 model = glm::mat4( 1.0f );
+					model = glm::translate(model, glm::vec3((float)i, 0.0f, (float)j));
+					//float angle = ( 20.0f * i ) + glfwGetTime();
+					model = glm::rotate( model, glm::radians( 0.0f ), glm::vec3( 1.0f, 1.0f, 1.0f ) );
+					ourShader.setMat4( "model", model );
+					
+					glDrawArrays( GL_TRIANGLES, 0, mesh.get_vsize() );
+				}
+			}
 		}
 		
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
