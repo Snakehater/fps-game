@@ -38,7 +38,10 @@ class Mesh
 	bool mesh_null; // if mesh is empty and acting as 'air' or 'void', passing NULL as filename in constructor causes this
 	int stride_offset_var; // offset to pass to glDrawArrays
 	int arr_offset; // offset in vertices array
+	glm::vec3 position_vec;
+	glm::vec3 rotation_vec;
 public:
+	float rotation_degree;
 	bool is_null() {
 		return mesh_null;
 	}
@@ -51,7 +54,23 @@ public:
 	int vert_num(){
 		return this->num_of_vertices;
 	}
+	void set_position(float x, float y, float z) {
+		this->position_vec = glm::vec3(x, y, z);
+	}
+	glm::vec3 get_position() {
+		return this->position_vec;
+	}
+	void set_rotation_vec(float x, float y, float z) {
+		this->rotation_vec = glm::vec3(x, y, z);
+	}
+	glm::vec3 get_rotation_vec() {
+		return this->rotation_vec;
+	}
 	std::vector<float> vertex_array_object;
+
+	Mesh() { // default constructor
+		this->mesh_null = true;
+	}
 	
 	Mesh(const char *filename, float scale_in = 1.0f, int* vertices_size = NULL, int* stride_offset_var_counter = NULL, int* arr_offset_cnt = NULL) {
 		if (filename == NULL) {
@@ -61,8 +80,14 @@ public:
 			this->mesh_null = false;
 		this->num_of_vertices = 0;
 		this->scale = scale_in;
+
+		// load file specified on construction
 		readfile(filename, &vertex_array_object);
+		
 		this->vsize = vertex_array_object.size();
+		set_rotation_vec(1.0f, 1.0f, 1.0f);
+		rotation_degree = 0.0f;
+
 		if (vertices_size != NULL)
 			*vertices_size += this->vsize;
 		if (stride_offset_var_counter != NULL) {

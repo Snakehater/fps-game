@@ -95,29 +95,44 @@ int main() {
 	int arr_offset_cnt = 0;
 	
 	// meshes
-	Mesh null_cube(NULL);
+	Mesh nullCube(NULL);
 	Mesh regular_cube("res/objects/cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
-	Mesh red_cube("res/objects/red_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
-	Mesh green_cube("res/objects/green_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
-	Mesh blue_cube("res/objects/blue_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
-	Mesh yellow_cube("res/objects/yellow_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+	Mesh redCube("res/objects/red_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+	Mesh greenCube("res/objects/green_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+	Mesh blueCube("res/objects/blue_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+	Mesh yellowCube("res/objects/yellow_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
 
-	std::vector<Mesh*> meshes;
-	meshes.push_back(&null_cube);
-	meshes.push_back(&regular_cube);
-	meshes.push_back(&red_cube);
-	meshes.push_back(&green_cube);
-	meshes.push_back(&blue_cube);
-	meshes.push_back(&yellow_cube);
+	std::vector<Mesh*> mesh_types;
+	mesh_types.push_back(&nullCube);
+	mesh_types.push_back(&regular_cube);
+	mesh_types.push_back(&redCube);
+	mesh_types.push_back(&greenCube);
+	mesh_types.push_back(&blueCube);
+	mesh_types.push_back(&yellowCube);
+
+	Mesh map_cubes[board_map_size*board_map_size]; // this will hold all cubes
+	{
+		int cnt = 0;
+		for (int i = 0; i < board_map_size; i++) {
+			for (int j = 0; j < board_map_size; j++) {
+				Mesh mesh = *mesh_types[board_map[i][j]];
+				mesh.set_position((float)j-(board_map_size/2), 0.0f, (float)i-(board_map_size/2));
+				mesh.set_rotation_vec(0.0f, 1.0f, 0.0f);
+				map_cubes[cnt] = mesh;
+				cnt++;
+			}
+		}
+	}
+
 
 	//float* vertices = &mesh.vertex_array_object[0];
 	float vertices[vertices_size] = { };
 
 	regular_cube.fill_arr(&vertices[0]);
-	red_cube.fill_arr(&vertices[0]);
-	green_cube.fill_arr(&vertices[0]);
-	blue_cube.fill_arr(&vertices[0]);
-	yellow_cube.fill_arr(&vertices[0]);
+	redCube.fill_arr(&vertices[0]);
+	greenCube.fill_arr(&vertices[0]);
+	blueCube.fill_arr(&vertices[0]);
+	yellowCube.fill_arr(&vertices[0]);
 
 	// vertex buffer objects (VBO) 
 	// vertex array object (VAO)
@@ -226,22 +241,20 @@ int main() {
 		
 		// render boxes
 		glBindVertexArray( VAO );
-		for (int i = 0; i < board_map_size; i++) {
-			for (uint8_t j = 0; j < board_map_size; j++) {
-				Mesh* our_mesh = meshes[board_map[i][j]];
-				if (our_mesh->is_null())
-					continue;
-		//		std::cout << "id " << board_map[i][j];
-		//		std::cout << " offset " << our_mesh->offset();
-		//		std::cout << " size " << our_mesh->size() << std::endl;
-				// calculate the model matrix for each object and pass it to shader before drawing
-				glm::mat4 model = glm::mat4( 1.0f );
-				model = glm::translate(model, glm::vec3((float)j-(board_map_size/2), 0.0f, (float)i-(board_map_size/2)));
-				//float angle = ( 20.0f * i ) + glfwGetTime();
-				model = glm::rotate( model, glm::radians( 0.0f ), glm::vec3( 1.0f, 1.0f, 1.0f ) );
-				ourShader.setMat4( "model", model );
-				glDrawArrays( GL_TRIANGLES, our_mesh->stride_offset(), our_mesh->vert_num());
-			}
+		for (int i = 0; i < board_map_size*board_map_size; i++) {
+			Mesh* our_mesh = &map_cubes[i];
+			if (our_mesh->is_null())
+				continue;
+	//		std::cout << "id " << board_map[i][j];
+	//		std::cout << " offset " << our_mesh->offset();
+	//		std::cout << " size " << our_mesh->size() << std::endl;
+			// calculate the model matrix for each object and pass it to shader before drawing
+			glm::mat4 model = glm::mat4( 1.0f );
+			model = glm::translate(model, our_mesh->get_position());
+			//float angle = ( 20.0f * i ) + glfwGetTime();
+			model = glm::rotate( model, glm::radians(our_mesh->rotation_degree), our_mesh->get_rotation_vec() );
+			ourShader.setMat4( "model", model );
+			glDrawArrays( GL_TRIANGLES, our_mesh->stride_offset(), our_mesh->vert_num());
 		}
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
