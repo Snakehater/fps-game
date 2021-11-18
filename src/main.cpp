@@ -9,6 +9,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
+int  get_mesh_offset(int* mesh_offsets, int target);
 
 // camera
 Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
@@ -19,9 +20,6 @@ bool firstMouse = true;
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
-
-// meshes
-Mesh mesh("res/objects/cube.obj", 0.5f);
 
 int main() {
 	// instantiate the GLFW window
@@ -71,73 +69,55 @@ int main() {
 	
 	// set up vertex data (and buffer(s)) and configure vertex attributes
 	// ------------------------------------------------------------------
-	/*float vertices[] = {
-		// positions x,y,z    // texture coords u,v
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-		 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-		-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-		-0.5f,  0.5f, -0.5f,  0.0f, 1.0f
-	};*/
 	// world space positions of our cubes
 	int board_map_size = 16;
 	float board_map[board_map_size][board_map_size] = {
-		{0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1},
-		{1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1},
-		{1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1},
-		{1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1},
-		{1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1},
+		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		{1, 1, 1, 1, 1, 1, 5, 1, 1, 3, 1, 1, 1, 1, 1, 1},
+		{1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1},
+		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1},
+		{1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		{1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1},
 		{1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1},
 		{1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1},
-		{1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1},
+		{1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+		{1, 1, 1, 1, 1, 1, 4, 1, 5, 1, 1, 1, 1, 1, 1, 1},
+		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1},
+		{1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1},
+		{1, 2, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1},
+		{1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1},
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1},
-		{1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-
 	};
 
-	float* vertices2 = &mesh.vertex_array_object[0];
+	int vertices_size = 0;
+	int stride_offset_counter = 0;
+	int arr_offset_cnt = 0;
+	
+	// meshes
+	Mesh null_cube(NULL);
+	Mesh regular_cube("res/objects/cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+	Mesh red_cube("res/objects/red_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+	Mesh green_cube("res/objects/green_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+	Mesh blue_cube("res/objects/blue_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+	Mesh yellow_cube("res/objects/yellow_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+
+	std::vector<Mesh*> meshes;
+	meshes.push_back(&null_cube);
+	meshes.push_back(&regular_cube);
+	meshes.push_back(&red_cube);
+	meshes.push_back(&green_cube);
+	meshes.push_back(&blue_cube);
+	meshes.push_back(&yellow_cube);
+
+	//float* vertices = &mesh.vertex_array_object[0];
+	float vertices[vertices_size] = { };
+
+	regular_cube.fill_arr(&vertices[0]);
+	red_cube.fill_arr(&vertices[0]);
+	green_cube.fill_arr(&vertices[0]);
+	blue_cube.fill_arr(&vertices[0]);
+	yellow_cube.fill_arr(&vertices[0]);
 
 	// vertex buffer objects (VBO) 
 	// vertex array object (VAO)
@@ -154,7 +134,7 @@ int main() {
 	// bind buffer and store vertices on graphics card
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	// glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*mesh.vertex_array_object.size(), vertices2, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(float)*vertices_size, vertices, GL_STATIC_DRAW);
 	// (removed) 3. copy our index array in a element buffer for OpenGL to use
 	
 	// 4. then set the vertex attributes pointers
@@ -248,19 +228,22 @@ int main() {
 		glBindVertexArray( VAO );
 		for (uint8_t i = 0; i < board_map_size; i++) {
 			for (uint8_t j = 0; j < board_map_size; j++) {
-				if (board_map[i][j] == 1) {
-					// calculate the model matrix for each object and pass it to shader before drawing
-					glm::mat4 model = glm::mat4( 1.0f );
-					model = glm::translate(model, glm::vec3((float)i, 0.0f, (float)j));
-					//float angle = ( 20.0f * i ) + glfwGetTime();
-					model = glm::rotate( model, glm::radians( 0.0f ), glm::vec3( 1.0f, 1.0f, 1.0f ) );
-					ourShader.setMat4( "model", model );
-					
-					glDrawArrays( GL_TRIANGLES, 0, mesh.get_vsize() );
-				}
+				Mesh* our_mesh = meshes[board_map[i][j]];
+				if (our_mesh->is_null())
+					continue;
+		//		std::cout << "id " << board_map[i][j];
+		//		std::cout << " offset " << our_mesh->offset();
+		//		std::cout << " size " << our_mesh->size() << std::endl;
+				// calculate the model matrix for each object and pass it to shader before drawing
+				glm::mat4 model = glm::mat4( 1.0f );
+				model = glm::translate(model, glm::vec3((float)i, 0.0f, (float)j));
+				//float angle = ( 20.0f * i ) + glfwGetTime();
+				model = glm::rotate( model, glm::radians( 0.0f ), glm::vec3( 1.0f, 1.0f, 1.0f ) );
+				ourShader.setMat4( "model", model );
+				glDrawArrays( GL_TRIANGLES, our_mesh->stride_offset(), our_mesh->vert_num());
 			}
 		}
-		
+
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
 		glfwSwapBuffers(window); 

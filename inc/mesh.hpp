@@ -18,7 +18,7 @@ class Mesh
 	};
 	std::vector<vertex> vertices;
 	std::vector<uv> uvs;
-	
+	int num_of_vertices;
 	std::vector<std::string> split(std::string s, std::string delimiter){
 		std::vector<std::string> output;
 		
@@ -33,21 +33,61 @@ class Mesh
 		output.push_back(s);
 		return output;
 	}
-	float vsize;
+	int vsize;
 	float scale;
+	bool mesh_null; // if mesh is empty and acting as 'air' or 'void', passing NULL as filename in constructor causes this
+	int stride_offset_var; // offset to pass to glDrawArrays
+	int arr_offset; // offset in vertices array
 public:
-	float get_vsize(){
+	bool is_null() {
+		return mesh_null;
+	}
+	int stride_offset() {
+		return this->stride_offset_var;
+	}
+	int size(){
 		return this->vsize;
+	}
+	int vert_num(){
+		return this->num_of_vertices;
 	}
 	std::vector<float> vertex_array_object;
 	
-	Mesh(const char *filename, float scale_in = 1.0f) {
+	Mesh(const char *filename, float scale_in = 1.0f, int* vertices_size = NULL, int* stride_offset_var_counter = NULL, int* arr_offset_cnt = NULL) {
+		if (filename == NULL) {
+			this->mesh_null = true;
+			return;
+		} else
+			this->mesh_null = false;
+		this->num_of_vertices = 0;
 		this->scale = scale_in;
 		readfile(filename, &vertex_array_object);
 		this->vsize = vertex_array_object.size();
+		if (vertices_size != NULL)
+			*vertices_size += this->vsize;
+		if (stride_offset_var_counter != NULL) {
+			this->stride_offset_var = *stride_offset_var_counter;
+			*stride_offset_var_counter += num_of_vertices;
+		} else
+			this->stride_offset_var = 0;
+
+		if (arr_offset_cnt != NULL) {
+			this->arr_offset = *arr_offset_cnt;
+			*arr_offset_cnt += vertex_array_object.size();
+		} else
+			this->arr_offset = 0;
 	}
 	void readfile(const char* filename, std::vector<float>* output);
+	void fill_arr(float* output, int start);
 };
+
+void Mesh::fill_arr(float* output, int start = -1){
+	if (start == -1)
+		start = this->arr_offset;
+	for(int i = 0; i < this->vsize; i++) {
+		output[start+i] = this->vertex_array_object[i];
+	}
+}
 
 void Mesh::readfile(const char *filename, std::vector<float>* output) {
 	std::cout << "STARING::MESH::READING_FROM_FILE" << std::endl;
@@ -75,6 +115,7 @@ void Mesh::readfile(const char *filename, std::vector<float>* output) {
 			std::cout << u.u << ' ' << u.v << std::endl;
 			uvs.push_back(u);
 		} else if (strcmp(ctrl_id, "f ") == 0) {
+			this->num_of_vertices += 3;
 			std::vector<std::string> face_raw = this->split(tmp, " ");
 			face f;
 			// store string vectors somewhere 
