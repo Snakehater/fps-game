@@ -12,7 +12,7 @@ void processInput(GLFWwindow *window);
 int  get_mesh_offset(int* mesh_offsets, int target);
 
 // camera
-Camera camera(glm::vec3(0.0f, 0.0f, 3.0f));
+Camera camera(glm::vec3(-0.5f, 22.0f, -0.5f), glm::vec3(0.0f, 2.0f, 0.0f), YAW, -89.9f);
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -74,7 +74,7 @@ int main() {
 	float board_map[board_map_size][board_map_size] = {
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 		{1, 1, 1, 1, 1, 1, 5, 1, 1, 3, 1, 1, 1, 1, 1, 1},
-		{1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1},
+		{1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1},
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1},
 		{1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1},
@@ -226,7 +226,7 @@ int main() {
 		
 		// render boxes
 		glBindVertexArray( VAO );
-		for (uint8_t i = 0; i < board_map_size; i++) {
+		for (int i = 0; i < board_map_size; i++) {
 			for (uint8_t j = 0; j < board_map_size; j++) {
 				Mesh* our_mesh = meshes[board_map[i][j]];
 				if (our_mesh->is_null())
@@ -236,7 +236,7 @@ int main() {
 		//		std::cout << " size " << our_mesh->size() << std::endl;
 				// calculate the model matrix for each object and pass it to shader before drawing
 				glm::mat4 model = glm::mat4( 1.0f );
-				model = glm::translate(model, glm::vec3((float)i, 0.0f, (float)j));
+				model = glm::translate(model, glm::vec3((float)j-(board_map_size/2), 0.0f, (float)i-(board_map_size/2)));
 				//float angle = ( 20.0f * i ) + glfwGetTime();
 				model = glm::rotate( model, glm::radians( 0.0f ), glm::vec3( 1.0f, 1.0f, 1.0f ) );
 				ourShader.setMat4( "model", model );
