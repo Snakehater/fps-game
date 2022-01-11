@@ -37,7 +37,7 @@ int main() {
 	std::cout << glfwGetVersionString() << std::endl;
 
 	// create a window object
-	GLFWwindow* window = glfwCreateWindow(800, 600, "RicochetRobots", NULL, NULL);
+	GLFWwindow* window = glfwCreateWindow(800, 600, "FPS", glfwGetPrimaryMonitor(), NULL);
 	if (window == NULL) {
 	    std::cout << "Failed to create GLFW window" << std::endl;
 	    glfwTerminate();
