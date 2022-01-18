@@ -21,6 +21,12 @@ bool firstMouse = true;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
+std::vector<float> vertex_array_object;
+VecUtils vecUtils;
+CollisionUtils collisionUtils;
+Mesh *floor_mesh = NULL;
+Mesh *regular_cube_ptr = NULL;
+
 int main() {
 	// instantiate the GLFW window
 	glfwInit();
@@ -70,7 +76,7 @@ int main() {
 	// set up vertex data (and buffer(s)) and configure vertex attributes
 	// ------------------------------------------------------------------
 	// world space positions of our cubes
-	int board_map_size = 16;
+	/*int board_map_size = 16;
 	float board_map[board_map_size][board_map_size] = {
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 		{1, 1, 1, 1, 1, 1, 5, 1, 1, 3, 1, 1, 1, 1, 1, 1},
@@ -88,7 +94,7 @@ int main() {
 		{1, 2, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1},
 		{1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1},
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	};
+	};*/
 
 	int vertices_size = 0;
 	int stride_offset_counter = 0;
@@ -101,6 +107,10 @@ int main() {
 	Mesh greenCube("res/objects/green_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
 	Mesh blueCube("res/objects/blue_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
 	Mesh yellowCube("res/objects/yellow_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+	Mesh plane_mesh("res/objects/plane.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+
+	floor_mesh = &plane_mesh;
+	regular_cube_ptr = &regular_cube;
 
 	std::vector<Mesh*> mesh_types;
 	mesh_types.push_back(&nullCube);
@@ -110,7 +120,7 @@ int main() {
 	mesh_types.push_back(&blueCube);
 	mesh_types.push_back(&yellowCube);
 
-	Mesh map_cubes[board_map_size*board_map_size]; // this will hold all cubes
+	/*Mesh map_cubes[board_map_size*board_map_size]; // this will hold all cubes
 	{
 		int cnt = 0;
 		for (int i = 0; i < board_map_size; i++) {
@@ -122,7 +132,7 @@ int main() {
 				cnt++;
 			}
 		}
-	}
+	}*/
 
 
 	//float* vertices = &mesh.vertex_array_object[0];
@@ -133,6 +143,13 @@ int main() {
 	greenCube.fill_arr(&vertices[0]);
 	blueCube.fill_arr(&vertices[0]);
 	yellowCube.fill_arr(&vertices[0]);
+	plane_mesh.fill_arr(&vertices[0]);
+
+
+
+	vertex_array_object = plane_mesh.vertex_array_object;
+
+
 
 	// vertex buffer objects (VBO) 
 	// vertex array object (VAO)
@@ -241,7 +258,7 @@ int main() {
 		
 		// render boxes
 		glBindVertexArray( VAO );
-		for (int i = 0; i < board_map_size*board_map_size; i++) {
+		/*for (int i = 0; i < board_map_size*board_map_size; i++) {
 			Mesh* our_mesh = &map_cubes[i];
 			if (our_mesh->is_null())
 				continue;
@@ -255,7 +272,24 @@ int main() {
 			model = glm::rotate( model, glm::radians(our_mesh->rotation_degree), our_mesh->get_rotation_vec() );
 			ourShader.setMat4( "model", model );
 			glDrawArrays( GL_TRIANGLES, our_mesh->stride_offset(), our_mesh->vert_num());
-		}
+		}*/
+		
+		// calculate the model matrix for each object and pass it to shader before drawing
+		glm::mat4 model = glm::mat4( 1.0f );
+		model = glm::translate(model, plane_mesh.get_position());
+		model = glm::rotate( model, glm::radians(plane_mesh.rotation_degree), plane_mesh.get_rotation_vec() );
+		ourShader.setMat4( "model", model );
+		glDrawArrays( GL_TRIANGLES, plane_mesh.stride_offset(), plane_mesh.vert_num());
+
+		//////////////////////
+
+		model = glm::mat4( 1.0f );
+		model = glm::translate(model, regular_cube.get_position());
+		model = glm::rotate( model, glm::radians(regular_cube.rotation_degree), regular_cube.get_rotation_vec() );
+		ourShader.setMat4( "model", model );
+		glDrawArrays( GL_TRIANGLES, regular_cube.stride_offset(), regular_cube.vert_num());
+		
+		//////////////////////
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
@@ -286,6 +320,34 @@ void processInput(GLFWwindow *window)
         camera.ProcessKeyboard(UP, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
         camera.ProcessKeyboard(DOWN, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
+    	std::cout << std::endl;
+	glm::vec3 v1, v2, v3;
+	v1.x = vertex_array_object[0];
+	v1.y = vertex_array_object[1];
+	v1.z = vertex_array_object[2];
+	
+	v2.x = vertex_array_object[5];
+	v2.y = vertex_array_object[6];
+	v2.z = vertex_array_object[7];
+	
+	v3.x = vertex_array_object[10];
+	v3.y = vertex_array_object[11];
+	v3.z = vertex_array_object[12];
+
+	vecUtils.setMatrices(camera, *floor_mesh, SCR_WIDTH, SCR_HEIGHT);
+	
+	glm::vec3 normal = vecUtils.computeNormal(v1, v2, v3);
+
+	regular_cube_ptr->position_vec += normal;
+	
+	std::cout << "Normal: " << std::endl;
+	std::cout << glm::to_string(normal).c_str() << std::endl;
+//	std::cout << glm::to_string(camera.position).c_str() << std::endl;
+
+	collisionUtils.planeRayTrace(normal, camera);
+
+    }
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes

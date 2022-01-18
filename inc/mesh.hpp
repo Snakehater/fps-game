@@ -38,9 +38,9 @@ class Mesh
 	bool mesh_null; // if mesh is empty and acting as 'air' or 'void', passing NULL as filename in constructor causes this
 	int stride_offset_var; // offset to pass to glDrawArrays
 	int arr_offset; // offset in vertices array
+public:
 	glm::vec3 position_vec;
 	glm::vec3 rotation_vec;
-public:
 	float rotation_degree;
 	bool is_null() {
 		return mesh_null;
@@ -81,7 +81,7 @@ public:
 		this->num_of_vertices = 0;
 		this->scale = scale_in;
 
-		// load file specified on construction
+		// load file specified on construction into vertex_array_object
 		readfile(filename, &vertex_array_object);
 		
 		this->vsize = vertex_array_object.size();

@@ -15,10 +15,13 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+#include <glm/gtx/string_cast.hpp>
 
 #include "shader.hpp"
 #include "camera.hpp"
 #include "mesh.hpp"
+#include "VecUtils.hpp"
+#include "CollisionUtils.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION // only import relevant stuff from stb_image.h
 #include "stb_image.h"
