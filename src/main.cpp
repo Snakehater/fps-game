@@ -12,7 +12,7 @@ void processInput(GLFWwindow *window);
 int  get_mesh_offset(int* mesh_offsets, int target);
 
 // camera
-Camera camera(glm::vec3(-0.5f, 22.0f, -0.5f), glm::vec3(0.0f, 2.0f, 0.0f), YAW, -89.9f);
+Camera camera(glm::vec3(0, 22.0f, 0), glm::vec3(0.0f, 2.0f, 0.0f), YAW, -89.9f);
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
@@ -26,6 +26,9 @@ VecUtils vecUtils;
 CollisionUtils collisionUtils;
 Mesh *floor_mesh = NULL;
 Mesh *regular_cube_ptr = NULL;
+Mesh *red_cube_ptr = NULL;
+Mesh *green_cube_ptr = NULL;
+Mesh *blue_cube_ptr = NULL;
 
 int main() {
 	// instantiate the GLFW window
@@ -111,6 +114,9 @@ int main() {
 
 	floor_mesh = &plane_mesh;
 	regular_cube_ptr = &regular_cube;
+	red_cube_ptr = &redCube;
+	green_cube_ptr = &greenCube;
+	blue_cube_ptr = &blueCube;
 
 	std::vector<Mesh*> mesh_types;
 	mesh_types.push_back(&nullCube);
@@ -288,7 +294,26 @@ int main() {
 		model = glm::rotate( model, glm::radians(regular_cube.rotation_degree), regular_cube.get_rotation_vec() );
 		ourShader.setMat4( "model", model );
 		glDrawArrays( GL_TRIANGLES, regular_cube.stride_offset(), regular_cube.vert_num());
+
+		model = glm::mat4( 1.0f );
+		model = glm::translate(model, redCube.get_position());
+		model = glm::rotate( model, glm::radians(redCube.rotation_degree), redCube.get_rotation_vec() );
+		ourShader.setMat4( "model", model );
+		glDrawArrays( GL_TRIANGLES, redCube.stride_offset(), redCube.vert_num());
 		
+		
+		model = glm::mat4( 1.0f );
+		model = glm::translate(model, greenCube.get_position());
+		model = glm::rotate( model, glm::radians(greenCube.rotation_degree), greenCube.get_rotation_vec() );
+		ourShader.setMat4( "model", model );
+		glDrawArrays( GL_TRIANGLES, greenCube.stride_offset(), greenCube.vert_num());
+
+		model = glm::mat4( 1.0f );
+		model = glm::translate(model, blueCube.get_position());
+		model = glm::rotate( model, glm::radians(blueCube.rotation_degree), blueCube.get_rotation_vec() );
+		ourShader.setMat4( "model", model );
+		glDrawArrays( GL_TRIANGLES, blueCube.stride_offset(), blueCube.vert_num());
+
 		//////////////////////
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
@@ -344,10 +369,14 @@ void processInput(GLFWwindow *window)
 //	std::cout << "Normal: " << std::endl;
 //	std::cout << glm::to_string(normal).c_str() << std::endl;
 //	std::cout << glm::to_string(camera.position).c_str() << std::endl;
+	if (collisionUtils.triangleIntersect(v1, v2, v3, normal, camera)) {
+		glm::vec3 pos = collisionUtils.planeIntersect(normal, v1, camera);
+		regular_cube_ptr->position_vec = pos;
+	}
 
-	glm::vec3 pos = collisionUtils.planeIntersect(normal, v1, camera);
-	//std::cout << glm::to_string(pos);
-	regular_cube_ptr->position_vec = pos;
+	red_cube_ptr->position_vec = v1;
+	green_cube_ptr->position_vec = v2;
+	blue_cube_ptr->position_vec = v3;
 
     }
 }
