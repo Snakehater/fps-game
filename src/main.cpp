@@ -339,13 +339,15 @@ void processInput(GLFWwindow *window)
 	
 	glm::vec3 normal = vecUtils.computeNormal(v1, v2, v3);
 
-	regular_cube_ptr->position_vec += normal;
+//	regular_cube_ptr->position_vec += normal;
 	
-	std::cout << "Normal: " << std::endl;
-	std::cout << glm::to_string(normal).c_str() << std::endl;
+//	std::cout << "Normal: " << std::endl;
+//	std::cout << glm::to_string(normal).c_str() << std::endl;
 //	std::cout << glm::to_string(camera.position).c_str() << std::endl;
 
-	collisionUtils.planeRayTrace(normal, camera);
+	glm::vec3 pos = collisionUtils.planeIntersect(normal, v1, camera);
+	//std::cout << glm::to_string(pos);
+	regular_cube_ptr->position_vec = pos;
 
     }
 }
