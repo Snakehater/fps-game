@@ -9,9 +9,9 @@ class CollisionUtils
 {
 public:
 	CollisionUtils(){}; /* Null constructor */
-	glm::vec3 planeIntersect(glm::vec3 normal, glm::vec3 random_point, Camera camera) {
-		glm::vec3 x0 = camera.position; // player position
-		glm::vec3 v1 = camera.cam_front;  // player look vector
+	glm::vec3 planeIntersect(glm::vec3 normal, glm::vec3 random_point, glm::vec3 position, glm::vec3 direction) {
+		glm::vec3 x0 = position; // player position
+		glm::vec3 v1 = direction;  // player look vector
 		glm::vec3 n  = normal; // the plane normal
 		glm::vec3 c  = random_point; // we need a random point on the plane
 		glm::vec3 w1 = c - x0; // vector from player to vec c
@@ -32,6 +32,9 @@ public:
 		glm::vec3 I = x0 + ray_vec; // intersection point on the plane
 		return I;
 	}
+	glm::vec3 planeIntersect(glm::vec3 normal, glm::vec3 random_point, Camera camera) {
+		return planeIntersect(normal, random_point, camera.position, camera.cam_front);
+	}
 	// projection of vector v1 onto v2
 	glm::vec3 project(glm::vec3 v1, glm::vec3 v2) {
 		float v2_ls = glm::length(v2)*glm::length(v2);
@@ -50,7 +53,10 @@ public:
 		return 1 - glm::length(project(AI, v))/glm::length(project(AB, v));
 	}
 	bool triangleIntersect(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, glm::vec3 normal, Camera camera) {
-		glm::vec3 I = planeIntersect(normal, v1, camera);
+		return triangleIntersect(v1, v2, v3, normal, camera.position, camera.cam_front);
+	}
+	bool triangleIntersect(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3, glm::vec3 normal, glm::vec3 position, glm::vec3 direction) {
+		glm::vec3 I = planeIntersect(normal, v1, position, direction);
 
 		float a = barycentricCoordinateA(v1, v2, v3, I);
 		float b = barycentricCoordinateA(v2, v3, v1, I);

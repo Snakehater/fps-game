@@ -10,12 +10,16 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 int  get_mesh_offset(int* mesh_offsets, int target);
+void updateGravity();
 
 // camera
 Camera camera(glm::vec3(0, 22.0f, 0), glm::vec3(0.0f, 2.0f, 0.0f), YAW, -89.9f);
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
 bool firstMouse = true;
+
+// player
+float v_speed = 0;
 
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
@@ -320,10 +324,62 @@ int main() {
 		// -------------------------------------------------------------------------------
 		glfwSwapBuffers(window); 
 		glfwPollEvents();
+		updateGravity();
 		usleep( 1 );
 	}
 	glfwTerminate(); // delete all of GLFW's resources that were allocated
 	return 0;
+}
+
+#define FEET_COL_DIST 2 // distance from player to feet for collision system
+
+void updateGravity() {
+	/* Collision system first */
+	glm::vec3 ppos = camera.position;
+	glm::vec3 pdir = glm::vec3(0, -1, 0);
+
+	glm::vec3 v1, v2, v3;
+	v1.x = vertex_array_object[0];
+	v1.y = vertex_array_object[1];
+	v1.z = vertex_array_object[2];
+	
+	v2.x = vertex_array_object[5];
+	v2.y = vertex_array_object[6];
+	v2.z = vertex_array_object[7];
+	
+	v3.x = vertex_array_object[10];
+	v3.y = vertex_array_object[11];
+	v3.z = vertex_array_object[12];
+
+	vecUtils.setMatrices(camera, *floor_mesh, SCR_WIDTH, SCR_HEIGHT);
+	
+	glm::vec3 normal = vecUtils.computeNormal(v1, v2, v3);
+	
+	bool freefall = true;
+	glm::vec3 I;
+	if (v_speed >= 0) {
+		if (collisionUtils.triangleIntersect(v1, v2, v3, normal, ppos, pdir)) {
+			freefall = false;
+			I = collisionUtils.planeIntersect(normal, v1, ppos, pdir);
+			if (glm::length(ppos - I) <= FEET_COL_DIST) {
+				v_speed = 0;
+				return; // if we collide with a triangle, stop movement
+			}
+		}
+	}
+
+	/* Calc new position according to gravity */
+	float t = 0.05;
+	float g = 9.82;
+
+	glm::vec3 xf = camera.position - glm::vec3(0, v_speed*t + 0.5*g*(t*t), 0); // new position
+	v_speed += 0.5f*g*t; // instead of assigning speed to the distance / time we just add above equation to it and divide with t
+
+	/* Make sure we our new position is inside of object bounding box */
+	if (!freefall && glm::length(xf - I) < FEET_COL_DIST)
+		camera.position = I + glm::vec3(0, FEET_COL_DIST, 0);
+	else
+		camera.position = xf;
 }
 
 // process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
@@ -342,11 +398,39 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-        camera.ProcessKeyboard(UP, deltaTime);
-    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-        camera.ProcessKeyboard(DOWN, deltaTime);
+	v_speed = -10;
+//        camera.ProcessKeyboard(UP, deltaTime);
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+    		glm::vec3 ppos = camera.position;
+		glm::vec3 pdir = glm::vec3(0, -1, 0);
+
+		glm::vec3 v1, v2, v3;
+		v1.x = vertex_array_object[0];
+		v1.y = vertex_array_object[1];
+		v1.z = vertex_array_object[2];
+		
+		v2.x = vertex_array_object[5];
+		v2.y = vertex_array_object[6];
+		v2.z = vertex_array_object[7];
+		
+		v3.x = vertex_array_object[10];
+		v3.y = vertex_array_object[11];
+		v3.z = vertex_array_object[12];
+
+		vecUtils.setMatrices(camera, *floor_mesh, SCR_WIDTH, SCR_HEIGHT);
+		
+		glm::vec3 normal = vecUtils.computeNormal(v1, v2, v3);
+		
+		bool toClose = false;
+		if (collisionUtils.triangleIntersect(v1, v2, v3, normal, ppos, pdir)) {
+			glm::vec3 I = collisionUtils.planeIntersect(normal, v1, ppos, pdir);
+			if (glm::length(ppos - I) < 2)
+				toClose = true;
+		}
+		if (!toClose)
+			camera.ProcessKeyboard(DOWN, deltaTime);
+	}
     if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
-    	std::cout << std::endl;
 	glm::vec3 v1, v2, v3;
 	v1.x = vertex_array_object[0];
 	v1.y = vertex_array_object[1];
