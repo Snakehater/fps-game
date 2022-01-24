@@ -354,6 +354,11 @@ void updateGravity() {
 			vecUtils.setMatrices(camera, *mesh, SCR_WIDTH, SCR_HEIGHT);
 			
 			glm::vec3 normal = vecUtils.computeNormal(v1, v2, v3);
+
+			/* */
+			vecUtils.transformVertexWorld(&v1);
+			vecUtils.transformVertexWorld(&v2);
+			vecUtils.transformVertexWorld(&v3);
 			
 			if (v_speed >= 0) {
 				if (collisionUtils.triangleIntersect(v1, v2, v3, normal, ppos, pdir)) {
@@ -402,73 +407,11 @@ void processInput(GLFWwindow *window)
     if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
         camera.ProcessKeyboard(RIGHT, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
-	v_speed = -10;
+	v_speed = -5;
 //        camera.ProcessKeyboard(UP, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
 	camera.ProcessKeyboard(DOWN, deltaTime);
 	}
-	/*	glm::vec3 ppos = camera.position;
-		glm::vec3 pdir = glm::vec3(0, -1, 0);
-
-		glm::vec3 v1, v2, v3;
-		v1.x = vertex_array_object[0];
-		v1.y = vertex_array_object[1];
-		v1.z = vertex_array_object[2];
-		
-		v2.x = vertex_array_object[5];
-		v2.y = vertex_array_object[6];
-		v2.z = vertex_array_object[7];
-		
-		v3.x = vertex_array_object[10];
-		v3.y = vertex_array_object[11];
-		v3.z = vertex_array_object[12];
-
-		vecUtils.setMatrices(camera, *floor_mesh, SCR_WIDTH, SCR_HEIGHT);
-		
-		glm::vec3 normal = vecUtils.computeNormal(v1, v2, v3);
-		
-		bool toClose = false;
-		if (collisionUtils.triangleIntersect(v1, v2, v3, normal, ppos, pdir)) {
-			glm::vec3 I = collisionUtils.planeIntersect(normal, v1, ppos, pdir);
-			if (glm::length(ppos - I) < 2)
-				toClose = true;
-		}
-		if (!toClose)
-			camera.ProcessKeyboard(DOWN, deltaTime);
-	}*/
-    /*if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
-	glm::vec3 v1, v2, v3;
-	v1.x = vertex_array_object[0];
-	v1.y = vertex_array_object[1];
-	v1.z = vertex_array_object[2];
-	
-	v2.x = vertex_array_object[5];
-	v2.y = vertex_array_object[6];
-	v2.z = vertex_array_object[7];
-	
-	v3.x = vertex_array_object[10];
-	v3.y = vertex_array_object[11];
-	v3.z = vertex_array_object[12];
-
-	vecUtils.setMatrices(camera, *floor_mesh, SCR_WIDTH, SCR_HEIGHT);
-	
-	glm::vec3 normal = vecUtils.computeNormal(v1, v2, v3);
-
-//	regular_cube_ptr->position_vec += normal;
-	
-//	std::cout << "Normal: " << std::endl;
-//	std::cout << glm::to_string(normal).c_str() << std::endl;
-//	std::cout << glm::to_string(camera.position).c_str() << std::endl;
-	if (collisionUtils.triangleIntersect(v1, v2, v3, normal, camera)) {
-		glm::vec3 pos = collisionUtils.planeIntersect(normal, v1, camera);
-		regular_cube_ptr->position_vec = pos;
-	}
-
-	red_cube_ptr->position_vec = v1;
-	green_cube_ptr->position_vec = v2;
-	blue_cube_ptr->position_vec = v3;
-
-    }*/
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
