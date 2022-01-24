@@ -33,7 +33,6 @@ class Mesh
 		output.push_back(s);
 		return output;
 	}
-	int vsize;
 	float scale;
 	bool mesh_null; // if mesh is empty and acting as 'air' or 'void', passing NULL as filename in constructor causes this
 	int stride_offset_var; // offset to pass to glDrawArrays
@@ -66,6 +65,7 @@ public:
 	glm::vec3 get_rotation_vec() {
 		return this->rotation_vec;
 	}
+	int vsize;
 	std::vector<float> vertex_array_object;
 
 	Mesh() { // default constructor

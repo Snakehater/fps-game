@@ -10,7 +10,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos);
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 int  get_mesh_offset(int* mesh_offsets, int target);
-void updateGravity();
+void updateGravity(void);
 
 // camera
 Camera camera(glm::vec3(0, 22.0f, 0), glm::vec3(0.0f, 2.0f, 0.0f), YAW, -89.9f);
@@ -25,14 +25,11 @@ float v_speed = 0;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
-std::vector<float> vertex_array_object;
 VecUtils vecUtils;
 CollisionUtils collisionUtils;
-Mesh *floor_mesh = NULL;
-Mesh *regular_cube_ptr = NULL;
-Mesh *red_cube_ptr = NULL;
-Mesh *green_cube_ptr = NULL;
-Mesh *blue_cube_ptr = NULL;
+
+/* Collision system, items that the player can collide with should be added to here */
+std::vector<Mesh*> collisionSystem;
 
 int main() {
 	// instantiate the GLFW window
@@ -116,12 +113,6 @@ int main() {
 	Mesh yellowCube("res/objects/yellow_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
 	Mesh plane_mesh("res/objects/plane.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
 
-	floor_mesh = &plane_mesh;
-	regular_cube_ptr = &regular_cube;
-	red_cube_ptr = &redCube;
-	green_cube_ptr = &greenCube;
-	blue_cube_ptr = &blueCube;
-
 	std::vector<Mesh*> mesh_types;
 	mesh_types.push_back(&nullCube);
 	mesh_types.push_back(&regular_cube);
@@ -129,6 +120,12 @@ int main() {
 	mesh_types.push_back(&greenCube);
 	mesh_types.push_back(&blueCube);
 	mesh_types.push_back(&yellowCube);
+
+	/* Add meshes to collision system */
+	collisionSystem.push_back(&plane_mesh);
+	collisionSystem.push_back(&regular_cube);
+
+	regular_cube.set_position(-2, 2, 2);
 
 	/*Mesh map_cubes[board_map_size*board_map_size]; // this will hold all cubes
 	{
@@ -154,13 +151,7 @@ int main() {
 	blueCube.fill_arr(&vertices[0]);
 	yellowCube.fill_arr(&vertices[0]);
 	plane_mesh.fill_arr(&vertices[0]);
-
-
-
-	vertex_array_object = plane_mesh.vertex_array_object;
-
-
-
+	
 	// vertex buffer objects (VBO) 
 	// vertex array object (VAO)
 	// element buffer object (EBO)
@@ -337,33 +328,46 @@ void updateGravity() {
 	/* Collision system first */
 	glm::vec3 ppos = camera.position;
 	glm::vec3 pdir = glm::vec3(0, -1, 0);
-
-	glm::vec3 v1, v2, v3;
-	v1.x = vertex_array_object[0];
-	v1.y = vertex_array_object[1];
-	v1.z = vertex_array_object[2];
-	
-	v2.x = vertex_array_object[5];
-	v2.y = vertex_array_object[6];
-	v2.z = vertex_array_object[7];
-	
-	v3.x = vertex_array_object[10];
-	v3.y = vertex_array_object[11];
-	v3.z = vertex_array_object[12];
-
-	vecUtils.setMatrices(camera, *floor_mesh, SCR_WIDTH, SCR_HEIGHT);
-	
-	glm::vec3 normal = vecUtils.computeNormal(v1, v2, v3);
-	
 	bool freefall = true;
-	glm::vec3 I;
-	if (v_speed >= 0) {
-		if (collisionUtils.triangleIntersect(v1, v2, v3, normal, ppos, pdir)) {
-			freefall = false;
-			I = collisionUtils.planeIntersect(normal, v1, ppos, pdir);
-			if (glm::length(ppos - I) <= FEET_COL_DIST) {
-				v_speed = 0;
-				return; // if we collide with a triangle, stop movement
+	glm::vec3 closest_I;
+	bool closest_I_set = false;
+
+	for (Mesh *mesh : collisionSystem) {
+		std::vector<float> v_buffer = mesh->vertex_array_object;
+		
+		/* We do three vertices each time */
+		for (int i = 0; i < mesh->vsize; i += 3) {
+			
+			glm::vec3 v1, v2, v3;
+			v1.x = v_buffer[i + 0 + 0];
+			v1.y = v_buffer[i + 0 + 1];
+			v1.z = v_buffer[i + 0 + 2];
+			
+			v2.x = v_buffer[i + 5 + 0];
+			v2.y = v_buffer[i + 5 + 1];
+			v2.z = v_buffer[i + 5 + 2];
+			
+			v3.x = v_buffer[i + 10 + 0];
+			v3.y = v_buffer[i + 10 + 1];
+			v3.z = v_buffer[i + 10 + 2];
+
+			vecUtils.setMatrices(camera, *mesh, SCR_WIDTH, SCR_HEIGHT);
+			
+			glm::vec3 normal = vecUtils.computeNormal(v1, v2, v3);
+			
+			if (v_speed >= 0) {
+				if (collisionUtils.triangleIntersect(v1, v2, v3, normal, ppos, pdir)) {
+					freefall = false;
+					glm::vec3 I = collisionUtils.planeIntersect(normal, v1, ppos, pdir);
+					if (!closest_I_set || glm::length(ppos - I) - glm::length(ppos - closest_I)) {
+						closest_I_set = true;
+						closest_I = I;
+					}
+					if (glm::length(ppos - I) <= FEET_COL_DIST) {
+						v_speed = 0;
+						return; // if we collide with a triangle, stop movement
+					}
+				}
 			}
 		}
 	}
@@ -376,8 +380,8 @@ void updateGravity() {
 	v_speed += 0.5f*g*t; // instead of assigning speed to the distance / time we just add above equation to it and divide with t
 
 	/* Make sure we our new position is inside of object bounding box */
-	if (!freefall && glm::length(xf - I) < FEET_COL_DIST)
-		camera.position = I + glm::vec3(0, FEET_COL_DIST, 0);
+	if (!freefall && glm::length(xf - closest_I) < FEET_COL_DIST)
+		camera.position = closest_I + glm::vec3(0, FEET_COL_DIST, 0);
 	else
 		camera.position = xf;
 }
@@ -401,7 +405,9 @@ void processInput(GLFWwindow *window)
 	v_speed = -10;
 //        camera.ProcessKeyboard(UP, deltaTime);
     if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
-    		glm::vec3 ppos = camera.position;
+	camera.ProcessKeyboard(DOWN, deltaTime);
+	}
+	/*	glm::vec3 ppos = camera.position;
 		glm::vec3 pdir = glm::vec3(0, -1, 0);
 
 		glm::vec3 v1, v2, v3;
@@ -429,8 +435,8 @@ void processInput(GLFWwindow *window)
 		}
 		if (!toClose)
 			camera.ProcessKeyboard(DOWN, deltaTime);
-	}
-    if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
+	}*/
+    /*if (glfwGetKey(window, GLFW_KEY_U) == GLFW_PRESS) {
 	glm::vec3 v1, v2, v3;
 	v1.x = vertex_array_object[0];
 	v1.y = vertex_array_object[1];
@@ -462,7 +468,7 @@ void processInput(GLFWwindow *window)
 	green_cube_ptr->position_vec = v2;
 	blue_cube_ptr->position_vec = v3;
 
-    }
+    }*/
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
