@@ -43,7 +43,8 @@ int main() {
 	Mesh greenCube("res/objects/green_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
 	Mesh blueCube("res/objects/blue_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
 	Mesh yellowCube("res/objects/yellow_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
-	Mesh plane_mesh("res/objects/plane.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+//	Mesh plane_mesh("res/objects/plane.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+	Mesh plane_mesh("res/objects/map.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
 
 	std::vector<Mesh*> mesh_types;
 	mesh_types.push_back(&nullCube);
@@ -317,7 +318,16 @@ int main() {
 		// -------------------------------------------------------------------------------
 		glfwSwapBuffers(window); 
 		glfwPollEvents();
+		
+//		auto start = std::chrono::high_resolution_clock::now();
 		updateGravity();
+/*		auto stop = std::chrono::high_resolution_clock::now();
+		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
+		std::cout << std::endl << "time:" << std::endl;
+		std::cout << ((float)duration.count())/1000 << std::endl;
+		glfwTerminate();
+		return 0; */
+
 		usleep( 1 );
 	}
 	glfwTerminate(); // delete all of GLFW's resources that were allocated
@@ -336,6 +346,8 @@ void updateGravity() {
 
 	for (Mesh *mesh : collisionSystem) {
 		std::vector<float> v_buffer = mesh->vertex_array_object;
+
+		vecUtils.setMatrices(camera, *mesh, SCR_WIDTH, SCR_HEIGHT);
 		
 		/* We do three vertices each time */
 		for (int i = 0; i < mesh->vsize; i += 3) {
@@ -352,8 +364,6 @@ void updateGravity() {
 			v3.x = v_buffer[i + 10 + 0];
 			v3.y = v_buffer[i + 10 + 1];
 			v3.z = v_buffer[i + 10 + 2];
-
-			vecUtils.setMatrices(camera, *mesh, SCR_WIDTH, SCR_HEIGHT);
 			
 			glm::vec3 normal = vecUtils.computeNormal(v1, v2, v3);
 
