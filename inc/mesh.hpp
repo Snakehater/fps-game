@@ -3,6 +3,7 @@
 #include <fstream>
 #include <sstream>
 #include "reader.hpp"
+#include "MaterialLib.hpp"
 
 class Mesh
 {
@@ -131,10 +132,17 @@ void Mesh::readfile(const char *filename, std::vector<float>* output) {
 		std::cout << "ERROR::MESH::LOAD_FILE" << std::endl;
 		return;
 	}
+	MaterialLib materialLib;
 	while(std::getline(infile, tmp)) {
-//		infile.drawbar();
+		infile.drawbar();
 		char ctrl_id[3] = {tmp[0], tmp[1], '\0'};
-		if (strcmp(ctrl_id, "v ") == 0) {
+		if (strncmp(tmp.c_str(), "mtllib", 6) == 0) {
+			std::cout << '\r';
+			std::string f_name = filename;
+			size_t pos = f_name.find_last_of("/");
+			/* Magic function, append new file name to old path and call function with it */
+			materialLib.load((f_name.substr(0, pos) + '/' + tmp.substr(7)).c_str());
+		} else if (strcmp(ctrl_id, "v ") == 0) {
 			vertex v;
 			std::vector<std::string> vertex_raw = this->split(tmp, " ");
 			v.x = std::stof(vertex_raw[1]) * scale;

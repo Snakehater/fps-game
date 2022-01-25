@@ -1,3 +1,6 @@
+#ifndef READER_H
+#define READER_H
+
 #include <iomanip>
 class reader : public std::ifstream {
 
@@ -57,4 +60,4 @@ private:
     }
 
 };
-
+#endif

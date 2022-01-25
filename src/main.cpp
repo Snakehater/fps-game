@@ -46,6 +46,8 @@ int main() {
 //	Mesh plane_mesh("res/objects/plane.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
 	Mesh plane_mesh("res/objects/map.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
 
+	return 0;
+
 	std::vector<Mesh*> mesh_types;
 	mesh_types.push_back(&nullCube);
 	mesh_types.push_back(&regular_cube);
@@ -267,7 +269,7 @@ int main() {
 		glfwPollEvents();
 		
 //		auto start = std::chrono::high_resolution_clock::now();
-		updateGravity();
+		//updateGravity();
 /*		auto stop = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
 		std::cout << std::endl << "time:" << std::endl;
