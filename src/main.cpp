@@ -107,44 +107,6 @@ int main() {
 	// we first try to load shaders from files
 	Shader ourShader( "shaders/vertex_core.glsl", "shaders/fragment_core.glsl" );
 	
-	// set up vertex data (and buffer(s)) and configure vertex attributes
-	// ------------------------------------------------------------------
-	// world space positions of our cubes
-	/*int board_map_size = 16;
-	float board_map[board_map_size][board_map_size] = {
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 5, 1, 1, 3, 1, 1, 1, 1, 1, 1},
-		{1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 4, 1, 5, 1, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1},
-		{1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1},
-		{1, 2, 1, 1, 1, 1, 1, 1, 1, 3, 1, 1, 1, 1, 1, 1},
-		{1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1},
-		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-	};*/
-	
-	/*Mesh map_cubes[board_map_size*board_map_size]; // this will hold all cubes
-	{
-		int cnt = 0;
-		for (int i = 0; i < board_map_size; i++) {
-			for (int j = 0; j < board_map_size; j++) {
-				Mesh mesh = *mesh_types[board_map[i][j]];
-				mesh.set_position((float)j-(board_map_size/2), 0.0f, (float)i-(board_map_size/2));
-				mesh.set_rotation_vec(0.0f, 1.0f, 0.0f);
-				map_cubes[cnt] = mesh;
-				cnt++;
-			}
-		}
-	}*/
-
-
 	//float* vertices = &mesh.vertex_array_object[0];
 	float vertices[vertices_size] = { };
 
@@ -262,21 +224,6 @@ int main() {
 		
 		// render boxes
 		glBindVertexArray( VAO );
-		/*for (int i = 0; i < board_map_size*board_map_size; i++) {
-			Mesh* our_mesh = &map_cubes[i];
-			if (our_mesh->is_null())
-				continue;
-	//		std::cout << "id " << board_map[i][j];
-	//		std::cout << " offset " << our_mesh->offset();
-	//		std::cout << " size " << our_mesh->size() << std::endl;
-			// calculate the model matrix for each object and pass it to shader before drawing
-			glm::mat4 model = glm::mat4( 1.0f );
-			model = glm::translate(model, our_mesh->get_position());
-			//float angle = ( 20.0f * i ) + glfwGetTime();
-			model = glm::rotate( model, glm::radians(our_mesh->rotation_degree), our_mesh->get_rotation_vec() );
-			ourShader.setMat4( "model", model );
-			glDrawArrays( GL_TRIANGLES, our_mesh->stride_offset(), our_mesh->vert_num());
-		}*/
 		
 		// calculate the model matrix for each object and pass it to shader before drawing
 		glm::mat4 model = glm::mat4( 1.0f );
