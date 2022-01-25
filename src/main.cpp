@@ -32,6 +32,35 @@ CollisionUtils collisionUtils;
 std::vector<Mesh*> collisionSystem;
 
 int main() {
+	/* We firstly want to load our models since this requires time */
+	int vertices_size = 0;
+	int stride_offset_counter = 0;
+	int arr_offset_cnt = 0;
+
+	Mesh nullCube(NULL);
+	Mesh regular_cube("res/objects/cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+	Mesh redCube("res/objects/red_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+	Mesh greenCube("res/objects/green_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+	Mesh blueCube("res/objects/blue_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+	Mesh yellowCube("res/objects/yellow_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+	Mesh plane_mesh("res/objects/plane.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+
+	std::vector<Mesh*> mesh_types;
+	mesh_types.push_back(&nullCube);
+	mesh_types.push_back(&regular_cube);
+	mesh_types.push_back(&redCube);
+	mesh_types.push_back(&greenCube);
+	mesh_types.push_back(&blueCube);
+	mesh_types.push_back(&yellowCube);
+
+	/* Add meshes to collision system */
+	collisionSystem.push_back(&plane_mesh);
+	collisionSystem.push_back(&regular_cube);
+
+	regular_cube.set_position(-2, 2, 2);
+
+	/* Model loading should now be done */
+
 	// instantiate the GLFW window
 	glfwInit();
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
@@ -99,34 +128,7 @@ int main() {
 		{1, 1, 1, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1},
 		{1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
 	};*/
-
-	int vertices_size = 0;
-	int stride_offset_counter = 0;
-	int arr_offset_cnt = 0;
 	
-	// meshes
-	Mesh nullCube(NULL);
-	Mesh regular_cube("res/objects/cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
-	Mesh redCube("res/objects/red_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
-	Mesh greenCube("res/objects/green_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
-	Mesh blueCube("res/objects/blue_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
-	Mesh yellowCube("res/objects/yellow_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
-	Mesh plane_mesh("res/objects/plane.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
-
-	std::vector<Mesh*> mesh_types;
-	mesh_types.push_back(&nullCube);
-	mesh_types.push_back(&regular_cube);
-	mesh_types.push_back(&redCube);
-	mesh_types.push_back(&greenCube);
-	mesh_types.push_back(&blueCube);
-	mesh_types.push_back(&yellowCube);
-
-	/* Add meshes to collision system */
-	collisionSystem.push_back(&plane_mesh);
-	collisionSystem.push_back(&regular_cube);
-
-	regular_cube.set_position(-2, 2, 2);
-
 	/*Mesh map_cubes[board_map_size*board_map_size]; // this will hold all cubes
 	{
 		int cnt = 0;
@@ -151,7 +153,7 @@ int main() {
 	blueCube.fill_arr(&vertices[0]);
 	yellowCube.fill_arr(&vertices[0]);
 	plane_mesh.fill_arr(&vertices[0]);
-	
+
 	// vertex buffer objects (VBO) 
 	// vertex array object (VAO)
 	// element buffer object (EBO)

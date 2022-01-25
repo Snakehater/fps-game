@@ -2,6 +2,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include "reader.hpp"
 
 class Mesh
 {
@@ -19,12 +20,17 @@ class Mesh
 	std::vector<vertex> vertices;
 	std::vector<uv> uvs;
 	int num_of_vertices;
-	std::vector<std::string> split(std::string s, std::string delimiter){
+	std::vector<std::string> split(std::string s, std::string delimiter, bool avoid_double = true){
 		std::vector<std::string> output;
 		
 		size_t pos = 0;	
 		std::string token;
 		while ((pos = s.find(delimiter)) != std::string::npos) {
+			/* If pos is 0 we have a double delimiter and something is probably wrong */
+			if (pos == 0 && avoid_double) {
+				s.erase(0, 1);
+				continue;
+			}
 			token = s.substr(0, pos);
 			output.push_back(token);
 			s.erase(0, pos + delimiter.length());
@@ -115,14 +121,18 @@ void Mesh::fill_arr(float* output, int start = -1){
 }
 
 void Mesh::readfile(const char *filename, std::vector<float>* output) {
-	std::cout << "STARING::MESH::READING_FROM_FILE" << std::endl;
+	// Creating reader with display of length 100 (100 #'s)
+	reader infile(50, filename);
+	std::cout << "-- reading file \"" << filename << "\"" << std::endl;
+
 	std::string tmp;
-	std::ifstream file(filename);
-	if(!file) {
+	
+	if(!infile) {
 		std::cout << "ERROR::MESH::LOAD_FILE" << std::endl;
 		return;
 	}
-	while(std::getline(file, tmp)) {
+	while(std::getline(infile, tmp)) {
+//		infile.drawbar();
 		char ctrl_id[3] = {tmp[0], tmp[1], '\0'};
 		if (strcmp(ctrl_id, "v ") == 0) {
 			vertex v;
@@ -130,14 +140,14 @@ void Mesh::readfile(const char *filename, std::vector<float>* output) {
 			v.x = std::stof(vertex_raw[1]) * scale;
 			v.y = std::stof(vertex_raw[2]) * scale;
 			v.z = std::stof(vertex_raw[3]) * scale;
-			std::cout << v.x << ' ' << v.y << ' ' << v.z << std::endl;
+//			std::cout << v.x << ' ' << v.y << ' ' << v.z << std::endl;
 			vertices.push_back(v);
 		} else if (strcmp(ctrl_id, "vt") == 0) {
 			uv u;
 			std::vector<std::string> uv_raw = this->split(tmp, " ");
 			u.u = std::stof(uv_raw[1]);
 			u.v = std::stof(uv_raw[2]);
-			std::cout << u.u << ' ' << u.v << std::endl;
+//			std::cout << u.u << ' ' << u.v << std::endl;
 			uvs.push_back(u);
 		} else if (strcmp(ctrl_id, "f ") == 0) {
 			this->num_of_vertices += 3;
@@ -147,7 +157,7 @@ void Mesh::readfile(const char *filename, std::vector<float>* output) {
 			f.a = this->split(face_raw[1], "/");
 			f.b = this->split(face_raw[2], "/");
 			f.c = this->split(face_raw[3], "/");
-			std::cout << face_raw[1] << ' ' << face_raw[2] << ' ' << face_raw[3] << std::endl;
+//			std::cout << face_raw[1] << ' ' << face_raw[2] << ' ' << face_raw[3] << std::endl;
 			// prep failsafe
 			uv failsafe;
 			failsafe.u = 0; failsafe.v = 0;
@@ -178,4 +188,5 @@ void Mesh::readfile(const char *filename, std::vector<float>* output) {
 			output->push_back(vc.x); output->push_back(vc.y); output->push_back(vc.z); output->push_back(uc.u); output->push_back(uc.v);
 		}
 	}
+	infile.drawbar();
 }
