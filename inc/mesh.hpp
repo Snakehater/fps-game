@@ -138,10 +138,22 @@ void Mesh::readfile(const char *filename, std::vector<float>* output) {
 		char ctrl_id[3] = {tmp[0], tmp[1], '\0'};
 		if (strncmp(tmp.c_str(), "mtllib", 6) == 0) {
 			std::cout << '\r';
+			
+			/* Split path and mesh file name in order to add the mtl file to the path */
 			std::string f_name = filename;
 			size_t pos = f_name.find_last_of("/");
-			/* Magic function, append new file name to old path and call function with it */
-			materialLib.load((f_name.substr(0, pos) + '/' + tmp.substr(7)).c_str());
+			
+			/* Get file name and remove ending returns and new lines etc */
+			std::string lib_fname = tmp.substr(7);
+			lib_fname.erase(lib_fname.find_last_not_of(" \n\r\t")+1);
+			
+			/* Assemble file path */
+			std::string lib_path = f_name.substr(0, pos);
+			lib_path += "/";
+			lib_path += lib_fname;
+
+			/* Load the file */
+			materialLib.load(lib_path.c_str());
 		} else if (strcmp(ctrl_id, "v ") == 0) {
 			vertex v;
 			std::vector<std::string> vertex_raw = this->split(tmp, " ");
