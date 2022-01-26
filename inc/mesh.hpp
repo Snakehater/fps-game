@@ -135,8 +135,10 @@ void Mesh::readfile(const char *filename, std::vector<float>* output) {
 	MaterialLib materialLib;
 	while(std::getline(infile, tmp)) {
 		infile.drawbar();
-		char ctrl_id[3] = {tmp[0], tmp[1], '\0'};
-		if (strncmp(tmp.c_str(), "mtllib", 6) == 0) {
+		
+		std::vector<std::string> splitted = this->split(tmp, " ");
+		const char *ctrl_id = splitted[0].c_str();
+		if (strcmp(ctrl_id, "mtllib") == 0) {
 			std::cout << '\r';
 			
 			/* Split path and mesh file name in order to add the mtl file to the path */
@@ -154,7 +156,9 @@ void Mesh::readfile(const char *filename, std::vector<float>* output) {
 
 			/* Load the file */
 			materialLib.load(lib_path.c_str());
-		} else if (strcmp(ctrl_id, "v ") == 0) {
+		} else if (strcmp(ctrl_id, "newmtl") == 0) {
+			materialLib.select(splitted[1].c_str());
+		} else if (strcmp(ctrl_id, "v") == 0) {
 			vertex v;
 			std::vector<std::string> vertex_raw = this->split(tmp, " ");
 			v.x = std::stof(vertex_raw[1]) * scale;
@@ -169,7 +173,7 @@ void Mesh::readfile(const char *filename, std::vector<float>* output) {
 			u.v = std::stof(uv_raw[2]);
 //			std::cout << u.u << ' ' << u.v << std::endl;
 			uvs.push_back(u);
-		} else if (strcmp(ctrl_id, "f ") == 0) {
+		} else if (strcmp(ctrl_id, "f") == 0) {
 			this->num_of_vertices += 3;
 			std::vector<std::string> face_raw = this->split(tmp, " ");
 			face f;
@@ -202,10 +206,13 @@ void Mesh::readfile(const char *filename, std::vector<float>* output) {
 				uc = uvs[std::stoi(f.c[1]) - 1];
 			else
 				uc = failsafe;
-			// load data into output  -- each stride consists of 5 floats, x y z u v, is the format, vertex three and textcoord 2
+			// load data into output  -- each stride consists of 8 floats, x y z u v r g b, is the format, vertex three, textcoord 2 and color 3
 			output->push_back(va.x); output->push_back(va.y); output->push_back(va.z); output->push_back(ua.u); output->push_back(ua.v);
+				materialLib.push_mtl(output);
 			output->push_back(vb.x); output->push_back(vb.y); output->push_back(vb.z); output->push_back(ub.u); output->push_back(ub.v);
+				materialLib.push_mtl(output);
 			output->push_back(vc.x); output->push_back(vc.y); output->push_back(vc.z); output->push_back(uc.u); output->push_back(uc.v);
+				materialLib.push_mtl(output);
 		}
 	}
 	infile.drawbar();

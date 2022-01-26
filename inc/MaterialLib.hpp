@@ -11,6 +11,8 @@ class MaterialLib
 	std::vector<std::string> _split(std::string s, std::string delimiter, bool avoid_couble = true);
 public:
 	std::vector<Material> materials;
+	Material selected;
+	bool available;
 	MaterialLib(void){};
 	void load(const char *filename){
 		// Creating reader with display of length 100 (100 #'s)
@@ -61,6 +63,29 @@ public:
 		}
 		infile.drawbar();
 	};
+	void select(const char *selector) {
+		for (Material m : materials) {
+			if (strcmp(m.name.c_str(), selector) == 0) {
+				this->selected = m;
+				this->available = true;
+				return;
+			}
+		}
+		this->available = false;
+	}
+	void push_mtl(std::vector<float>* output) {
+		if (!this->available) {
+			output->push_back(255.0f);
+			output->push_back(255.0f);
+			output->push_back(255.0f);
+			return;
+		}
+
+		output->push_back(this->selected.ambient_color.x);
+		output->push_back(this->selected.ambient_color.y);
+		output->push_back(this->selected.ambient_color.z);
+	}
+
 };
 
 

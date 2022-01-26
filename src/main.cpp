@@ -46,8 +46,6 @@ int main() {
 //	Mesh plane_mesh("res/objects/plane.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
 	Mesh plane_mesh("res/objects/map.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
 
-	return 0;
-
 	std::vector<Mesh*> mesh_types;
 	mesh_types.push_back(&nullCube);
 	mesh_types.push_back(&regular_cube);
@@ -139,12 +137,15 @@ int main() {
 	
 	// 4. then set the vertex attributes pointers
 	
-	// on the attribute pointers: 5 is the number of indexes that points to an index. 3pos + 2texcoord
+	// on the attribute pointers: 8 is the number of indexes that points to an index. 3pos + 2texcoord + 3color
 	// position attribute
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	glEnableVertexAttribArray(0);
 	// texture coord attribute
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(3 * sizeof(float)));
+	glEnableVertexAttribArray(1);
+	// ambient color attribute
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(5 * sizeof(float)));
 	glEnableVertexAttribArray(1);
 
 	// load and create a texture
