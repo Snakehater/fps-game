@@ -38,27 +38,21 @@ int main() {
 	int arr_offset_cnt = 0;
 
 	Mesh nullCube(NULL);
-	Mesh regular_cube("res/objects/cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+//	Mesh regular_cube("res/objects/cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
 	Mesh redCube("res/objects/red_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
-	Mesh greenCube("res/objects/green_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
-	Mesh blueCube("res/objects/blue_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
-	Mesh yellowCube("res/objects/yellow_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
 //	Mesh plane_mesh("res/objects/plane.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
 	Mesh plane_mesh("res/objects/map.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
 
 	std::vector<Mesh*> mesh_types;
 	mesh_types.push_back(&nullCube);
-	mesh_types.push_back(&regular_cube);
+//	mesh_types.push_back(&regular_cube);
 	mesh_types.push_back(&redCube);
-	mesh_types.push_back(&greenCube);
-	mesh_types.push_back(&blueCube);
-	mesh_types.push_back(&yellowCube);
 
 	/* Add meshes to collision system */
 	collisionSystem.push_back(&plane_mesh);
-	collisionSystem.push_back(&regular_cube);
+	collisionSystem.push_back(&redCube);
 
-	regular_cube.set_position(-2, 2, 2);
+	redCube.set_position(-2, 2, 2);
 
 	/* Model loading should now be done */
 
@@ -110,11 +104,11 @@ int main() {
 	//float* vertices = &mesh.vertex_array_object[0];
 	float vertices[vertices_size] = { };
 
-	regular_cube.fill_arr(&vertices[0]);
+//	regular_cube.fill_arr(&vertices[0]);
 	redCube.fill_arr(&vertices[0]);
-	greenCube.fill_arr(&vertices[0]);
-	blueCube.fill_arr(&vertices[0]);
-	yellowCube.fill_arr(&vertices[0]);
+//	greenCube.fill_arr(&vertices[0]);
+//	blueCube.fill_arr(&vertices[0]);
+//	yellowCube.fill_arr(&vertices[0]);
 	plane_mesh.fill_arr(&vertices[0]);
 
 	// vertex buffer objects (VBO) 
@@ -237,18 +231,18 @@ int main() {
 
 		//////////////////////
 
-		model = glm::mat4( 1.0f );
+/*		model = glm::mat4( 1.0f );
 		model = glm::translate(model, regular_cube.get_position());
 		model = glm::rotate( model, glm::radians(regular_cube.rotation_degree), regular_cube.get_rotation_vec() );
 		ourShader.setMat4( "model", model );
-		glDrawArrays( GL_TRIANGLES, regular_cube.stride_offset(), regular_cube.vert_num());
+		glDrawArrays( GL_TRIANGLES, regular_cube.stride_offset(), regular_cube.vert_num()); */
 
 		model = glm::mat4( 1.0f );
 		model = glm::translate(model, redCube.get_position());
 		model = glm::rotate( model, glm::radians(redCube.rotation_degree), redCube.get_rotation_vec() );
 		ourShader.setMat4( "model", model );
 		glDrawArrays( GL_TRIANGLES, redCube.stride_offset(), redCube.vert_num());
-		
+		/*
 		
 		model = glm::mat4( 1.0f );
 		model = glm::translate(model, greenCube.get_position());
@@ -260,7 +254,7 @@ int main() {
 		model = glm::translate(model, blueCube.get_position());
 		model = glm::rotate( model, glm::radians(blueCube.rotation_degree), blueCube.get_rotation_vec() );
 		ourShader.setMat4( "model", model );
-		glDrawArrays( GL_TRIANGLES, blueCube.stride_offset(), blueCube.vert_num());
+		glDrawArrays( GL_TRIANGLES, blueCube.stride_offset(), blueCube.vert_num()); */
 
 		//////////////////////
 
