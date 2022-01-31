@@ -1,3 +1,5 @@
+#ifndef MATERIAL_H
+#define MATERIAL_H
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -25,3 +27,4 @@ public:
 		transparency = 1.0f;
 	};
 };
+#endif

@@ -1,3 +1,5 @@
+#ifndef MATERIAL_LIB_H
+#define MATERIAL_LIB_H
 #include <iostream>
 #include <string>
 #include <fstream>
@@ -30,18 +32,13 @@ public:
 		bool materialStarted = false; /* This is so we don't add empty materials to our vector */
 		while(std::getline(infile, line)) {
 		//	infile.drawbar();
-			if (line.empty()) {
-				if (materialStarted) {
-					materials.push_back(material);
-					materialStarted = false;
-				}
-				continue;
-			}
 			std::vector<std::string> splitted = this->_split(line, " ");
 			const char* key = splitted[0].c_str();
 			
 			/* Handle keyword and load value into the material object */
 			if (strcmp(key, "newmtl") == 0) {
+				if (materialStarted) 
+					materials.push_back(material);
 				material.name = splitted[1];
 				materialStarted = true;
 			} else if (strcmp(key, "Ka") == 0) {
@@ -61,6 +58,8 @@ public:
 			} else if (strcmp(key, "d") == 0)
 				material.transparency = std::stof(splitted[1]);
 		}
+		if (materialStarted) 
+			materials.push_back(material);
 		infile.drawbar();
 	};
 	void select(const char *selector) {
@@ -108,3 +107,4 @@ std::vector<std::string> MaterialLib::_split(std::string s, std::string delimite
 	output.push_back(s);
 	return output;
 }
+#endif

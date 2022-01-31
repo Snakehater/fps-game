@@ -31,28 +31,20 @@ CollisionUtils collisionUtils;
 /* Collision system, items that the player can collide with should be added to here */
 std::vector<Mesh*> collisionSystem;
 
+// Objects of the scene
+std::vector<Mesh> objects;
+
 int main() {
 	/* We firstly want to load our models since this requires time */
 	int vertices_size = 0;
 	int stride_offset_counter = 0;
 	int arr_offset_cnt = 0;
 
-	Mesh nullCube(NULL);
-//	Mesh regular_cube("res/objects/cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
-	Mesh redCube("res/objects/red_cube.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
-//	Mesh plane_mesh("res/objects/plane.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
-	Mesh plane_mesh("res/objects/map.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
-
-	std::vector<Mesh*> mesh_types;
-	mesh_types.push_back(&nullCube);
-//	mesh_types.push_back(&regular_cube);
-	mesh_types.push_back(&redCube);
+//	Mesh plane_mesh("res/objects/map.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
+	ObjLoader map("res/objects/map.obj", &objects, 1.0f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
 
 	/* Add meshes to collision system */
-	collisionSystem.push_back(&plane_mesh);
-	collisionSystem.push_back(&redCube);
-
-	redCube.set_position(-2, 2, 2);
+//	collisionSystem.push_back(&plane_mesh);
 
 	/* Model loading should now be done */
 
@@ -104,12 +96,8 @@ int main() {
 	//float* vertices = &mesh.vertex_array_object[0];
 	float vertices[vertices_size] = { };
 
-//	regular_cube.fill_arr(&vertices[0]);
-	redCube.fill_arr(&vertices[0]);
-//	greenCube.fill_arr(&vertices[0]);
-//	blueCube.fill_arr(&vertices[0]);
-//	yellowCube.fill_arr(&vertices[0]);
-	plane_mesh.fill_arr(&vertices[0]);
+	for (Mesh m : objects)
+		m.fill_arr(&vertices[0]);
 
 	// vertex buffer objects (VBO) 
 	// vertex array object (VAO)
@@ -223,40 +211,13 @@ int main() {
 		glBindVertexArray( VAO );
 		
 		// calculate the model matrix for each object and pass it to shader before drawing
-		glm::mat4 model = glm::mat4( 1.0f );
-		model = glm::translate(model, plane_mesh.get_position());
-		model = glm::rotate( model, glm::radians(plane_mesh.rotation_degree), plane_mesh.get_rotation_vec() );
-		ourShader.setMat4( "model", model );
-		glDrawArrays( GL_TRIANGLES, plane_mesh.stride_offset(), plane_mesh.vert_num());
-
-		//////////////////////
-
-/*		model = glm::mat4( 1.0f );
-		model = glm::translate(model, regular_cube.get_position());
-		model = glm::rotate( model, glm::radians(regular_cube.rotation_degree), regular_cube.get_rotation_vec() );
-		ourShader.setMat4( "model", model );
-		glDrawArrays( GL_TRIANGLES, regular_cube.stride_offset(), regular_cube.vert_num()); */
-
-		model = glm::mat4( 1.0f );
-		model = glm::translate(model, redCube.get_position());
-		model = glm::rotate( model, glm::radians(redCube.rotation_degree), redCube.get_rotation_vec() );
-		ourShader.setMat4( "model", model );
-		glDrawArrays( GL_TRIANGLES, redCube.stride_offset(), redCube.vert_num());
-		/*
-		
-		model = glm::mat4( 1.0f );
-		model = glm::translate(model, greenCube.get_position());
-		model = glm::rotate( model, glm::radians(greenCube.rotation_degree), greenCube.get_rotation_vec() );
-		ourShader.setMat4( "model", model );
-		glDrawArrays( GL_TRIANGLES, greenCube.stride_offset(), greenCube.vert_num());
-
-		model = glm::mat4( 1.0f );
-		model = glm::translate(model, blueCube.get_position());
-		model = glm::rotate( model, glm::radians(blueCube.rotation_degree), blueCube.get_rotation_vec() );
-		ourShader.setMat4( "model", model );
-		glDrawArrays( GL_TRIANGLES, blueCube.stride_offset(), blueCube.vert_num()); */
-
-		//////////////////////
+		for (Mesh m : objects) {
+			glm::mat4 model = glm::mat4( 1.0f );
+			model = glm::translate(model, m.get_position());
+			model = glm::rotate( model, glm::radians(m.rotation_degree), m.get_rotation_vec() );
+			ourShader.setMat4( "model", model );
+			glDrawArrays( GL_TRIANGLES, m.stride_offset(), m.vert_num());
+		}
 
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
@@ -294,7 +255,7 @@ void updateGravity() {
 		vecUtils.setMatrices(camera, *mesh, SCR_WIDTH, SCR_HEIGHT);
 		
 		/* We do three vertices each time */
-		for (int i = 0; i < mesh->vsize; i += 3) {
+		for (int i = 0; i < mesh->size(); i += 3) {
 			
 			glm::vec3 v1, v2, v3;
 			v1.x = v_buffer[i + 0 + 0];

@@ -45,6 +45,7 @@ class Mesh
 	int stride_offset_var; // offset to pass to glDrawArrays
 	int arr_offset; // offset in vertices array
 public:
+	std::string name;
 	glm::vec3 position_vec;
 	glm::vec3 rotation_vec;
 	float rotation_degree;
@@ -55,7 +56,7 @@ public:
 		return this->stride_offset_var;
 	}
 	int size(){
-		return this->vsize;
+		return this->vertex_array_object.size();
 	}
 	int vert_num(){
 		return this->num_of_vertices;
@@ -72,31 +73,25 @@ public:
 	glm::vec3 get_rotation_vec() {
 		return this->rotation_vec;
 	}
-	int vsize;
 	std::vector<float> vertex_array_object;
 
 	Mesh() { // default constructor
 		this->mesh_null = true;
 	}
 	
-	Mesh(const char *filename, float scale_in = 1.0f, int* vertices_size = NULL, int* stride_offset_var_counter = NULL, int* arr_offset_cnt = NULL) {
-		if (filename == NULL) {
-			this->mesh_null = true;
-			return;
-		} else
-			this->mesh_null = false;
-		this->num_of_vertices = 0;
+	Mesh(std::string object_name, std::vector<float> vector_in, int num_of_vertices_in, float scale_in = 1.0f, int* vertices_size = NULL, int* stride_offset_var_counter = NULL, int* arr_offset_cnt = NULL) {
+		this->num_of_vertices = num_of_vertices_in;
 		this->scale = scale_in;
+		this->name = object_name;
 
-		// load file specified on construction into vertex_array_object
-		readfile(filename, &vertex_array_object);
+		// copy vector to vertex_array_object
+		vertex_array_object = vector_in;
 		
-		this->vsize = vertex_array_object.size();
 		set_rotation_vec(1.0f, 1.0f, 1.0f);
 		rotation_degree = 0.0f;
 
 		if (vertices_size != NULL)
-			*vertices_size += this->vsize;
+			*vertices_size += this->size();
 		if (stride_offset_var_counter != NULL) {
 			this->stride_offset_var = *stride_offset_var_counter;
 			*stride_offset_var_counter += num_of_vertices;
@@ -109,111 +104,13 @@ public:
 		} else
 			this->arr_offset = 0;
 	}
-	void readfile(const char* filename, std::vector<float>* output);
 	void fill_arr(float* output, int start);
 };
 
 void Mesh::fill_arr(float* output, int start = -1){
 	if (start == -1)
 		start = this->arr_offset;
-	for(int i = 0; i < this->vsize; i++) {
+	for(int i = 0; i < this->size(); i++) {
 		output[start+i] = this->vertex_array_object[i];
 	}
-}
-
-void Mesh::readfile(const char *filename, std::vector<float>* output) {
-	// Creating reader with display of length 100 (100 #'s)
-	reader infile(50, filename);
-	std::cout << "-- reading file \"" << filename << "\"" << std::endl;
-
-	std::string tmp;
-	
-	if(!infile) {
-		std::cout << "ERROR::MESH::LOAD_FILE" << std::endl;
-		return;
-	}
-	MaterialLib materialLib;
-	while(std::getline(infile, tmp)) {
-		infile.drawbar();
-		
-		std::vector<std::string> splitted = this->split(tmp, " ");
-		const char *ctrl_id = splitted[0].c_str();
-		if (strcmp(ctrl_id, "mtllib") == 0) {
-			std::cout << '\r';
-			
-			/* Split path and mesh file name in order to add the mtl file to the path */
-			std::string f_name = filename;
-			size_t pos = f_name.find_last_of("/");
-			
-			/* Get file name and remove ending returns and new lines etc */
-			std::string lib_fname = tmp.substr(7);
-			lib_fname.erase(lib_fname.find_last_not_of(" \n\r\t")+1);
-			
-			/* Assemble file path */
-			std::string lib_path = f_name.substr(0, pos);
-			lib_path += "/";
-			lib_path += lib_fname;
-
-			/* Load the file */
-			materialLib.load(lib_path.c_str());
-		} else if (strcmp(ctrl_id, "newmtl") == 0) {
-			materialLib.select(splitted[1].c_str());
-		} else if (strcmp(ctrl_id, "v") == 0) {
-			vertex v;
-			std::vector<std::string> vertex_raw = this->split(tmp, " ");
-			v.x = std::stof(vertex_raw[1]) * scale;
-			v.y = std::stof(vertex_raw[2]) * scale;
-			v.z = std::stof(vertex_raw[3]) * scale;
-//			std::cout << v.x << ' ' << v.y << ' ' << v.z << std::endl;
-			vertices.push_back(v);
-		} else if (strcmp(ctrl_id, "vt") == 0) {
-			uv u;
-			std::vector<std::string> uv_raw = this->split(tmp, " ");
-			u.u = std::stof(uv_raw[1]);
-			u.v = std::stof(uv_raw[2]);
-//			std::cout << u.u << ' ' << u.v << std::endl;
-			uvs.push_back(u);
-		} else if (strcmp(ctrl_id, "f") == 0) {
-			this->num_of_vertices += 3;
-			std::vector<std::string> face_raw = this->split(tmp, " ");
-			face f;
-			// store string vectors somewhere 
-			f.a = this->split(face_raw[1], "/");
-			f.b = this->split(face_raw[2], "/");
-			f.c = this->split(face_raw[3], "/");
-//			std::cout << face_raw[1] << ' ' << face_raw[2] << ' ' << face_raw[3] << std::endl;
-			// prep failsafe
-			uv failsafe;
-			failsafe.u = 0; failsafe.v = 0;
-			// prep for output
-			vertex va = vertices[std::stoi(f.a[0]) - 1];
-			uv ua;
-			if (f.a.size() > 1)
-				ua = uvs[std::stoi(f.a[1]) - 1];
-			else
-				ua = failsafe;
-
-			vertex vb = vertices[std::stoi(f.b[0]) - 1];
-			uv ub;
-			if (f.b.size() > 1)
-				ub = uvs[std::stoi(f.b[1]) - 1];
-			else
-				ub = failsafe;
-			
-			vertex vc = vertices[std::stoi(f.c[0]) - 1];
-			uv uc;
-			if (f.c.size() > 1)
-				uc = uvs[std::stoi(f.c[1]) - 1];
-			else
-				uc = failsafe;
-			// load data into output  -- each stride consists of 8 floats, x y z u v r g b, is the format, vertex three, textcoord 2 and color 3
-			output->push_back(va.x); output->push_back(va.y); output->push_back(va.z); output->push_back(ua.u); output->push_back(ua.v);
-				materialLib.push_mtl(output);
-			output->push_back(vb.x); output->push_back(vb.y); output->push_back(vb.z); output->push_back(ub.u); output->push_back(ub.v);
-				materialLib.push_mtl(output);
-			output->push_back(vc.x); output->push_back(vc.y); output->push_back(vc.z); output->push_back(uc.u); output->push_back(uc.v);
-				materialLib.push_mtl(output);
-		}
-	}
-	infile.drawbar();
 }
