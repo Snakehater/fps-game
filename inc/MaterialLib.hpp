@@ -11,6 +11,7 @@
 class MaterialLib
 {
 	std::vector<std::string> _split(std::string s, std::string delimiter, bool avoid_couble = true);
+	void _removeCarriage(std::string *str);
 public:
 	std::vector<Material> materials;
 	Material selected;
@@ -32,6 +33,7 @@ public:
 		bool materialStarted = false; /* This is so we don't add empty materials to our vector */
 		while(std::getline(infile, line)) {
 		//	infile.drawbar();
+			this->_removeCarriage(&line);
 			std::vector<std::string> splitted = this->_split(line, " ");
 			const char* key = splitted[0].c_str();
 			
@@ -86,6 +88,16 @@ public:
 	}
 
 };
+
+void MaterialLib::_removeCarriage(std::string *str) {
+	for (long unsigned int i = 0; i < str->length(); i++) {
+		/* Match with windows carriage return */
+		if ((*str)[i] == 0x0D) {
+			str->erase(i, 1);
+			i--;
+		}
+	}
+}
 
 
 std::vector<std::string> MaterialLib::_split(std::string s, std::string delimiter, bool avoid_double){

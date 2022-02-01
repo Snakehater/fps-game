@@ -46,6 +46,7 @@ class Mesh
 	int arr_offset; // offset in vertices array
 public:
 	std::string name;
+	std::vector<Material> material_buffer;
 	glm::vec3 position_vec;
 	glm::vec3 rotation_vec;
 	float rotation_degree;
@@ -79,10 +80,11 @@ public:
 		this->mesh_null = true;
 	}
 	
-	Mesh(std::string object_name, std::vector<float> vector_in, int num_of_vertices_in, float scale_in = 1.0f, int* vertices_size = NULL, int* stride_offset_var_counter = NULL, int* arr_offset_cnt = NULL) {
+	Mesh(std::string object_name, std::vector<float> vector_in, std::vector<Material> materials_in, int num_of_vertices_in, float scale_in = 1.0f, int* vertices_size = NULL, int* stride_offset_var_counter = NULL, int* arr_offset_cnt = NULL) {
 		this->num_of_vertices = num_of_vertices_in;
 		this->scale = scale_in;
 		this->name = object_name;
+		this->material_buffer = materials_in;
 
 		// copy vector to vertex_array_object
 		vertex_array_object = vector_in;

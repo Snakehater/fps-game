@@ -7,6 +7,8 @@
 
 class ObjLoader
 {
+	void _removeCarriage(std::string *str);
+
 	struct vertex{
 		float x;
 		float y;
@@ -45,7 +47,9 @@ public:
 
 		std::string object_name = "";
 		std::vector<float> vertex_buffer;
-		int num_of_vertices;
+		std::vector<Material> material_buffer;
+		int material_counter = 0;
+		int num_of_vertices = 0;
 
 		// Creating reader with display of length 100 (100 #'s)
 		reader infile(50, filename);
@@ -61,14 +65,18 @@ public:
 
 		while(std::getline(infile, tmp)) {
 			infile.drawbar();
+
+			_removeCarriage(&tmp);
 			
 			std::vector<std::string> splitted = this->split(tmp, " ");
 			const char *ctrl_id = splitted[0].c_str();
 			if (strcmp(ctrl_id, "o") == 0) {
 				if (object_name.length() != 0) {
-					Mesh mesh(object_name, vertex_buffer, num_of_vertices, scale, vertices_size, stride_offset_var_counter, arr_offset_cnt);
+					Mesh mesh(object_name, vertex_buffer, material_buffer, num_of_vertices, scale, vertices_size, stride_offset_var_counter, arr_offset_cnt);
 					mesh_vector->push_back(mesh);
 					vertex_buffer.clear();
+					material_buffer.clear();
+					material_counter = 0;
 					num_of_vertices = 0;
 					object_name = splitted[1];
 				} else
@@ -93,6 +101,10 @@ public:
 				materialLib.load(lib_path.c_str());
 			} else if (strcmp(ctrl_id, "usemtl") == 0) {
 				materialLib.select(splitted[1].c_str());
+				if (materialLib.available) {
+					material_buffer.push_back(materialLib.selected);
+					material_counter++;
+				}
 			} else if (strcmp(ctrl_id, "v") == 0) {
 				vertex v;
 				std::vector<std::string> vertex_raw = this->split(tmp, " ");
@@ -151,7 +163,7 @@ public:
 			}
 		}
 		// above code will only create a new mesh when obj file states a new object, therefore, we need to add the last mesh manually:
-		Mesh mesh(object_name, vertex_buffer, num_of_vertices, scale, vertices_size, stride_offset_var_counter, arr_offset_cnt);
+		Mesh mesh(object_name, vertex_buffer, material_buffer, num_of_vertices, scale, vertices_size, stride_offset_var_counter, arr_offset_cnt);
 		mesh_vector->push_back(mesh);
 		vertex_buffer.clear();
 		num_of_vertices = 0;
@@ -160,3 +172,14 @@ public:
 		infile.drawbar();
 	}
 };
+
+void ObjLoader::_removeCarriage(std::string *str) {
+	for (long unsigned int i = 0; i < str->length(); i++) {
+		/* Match with windows carriage return */
+		if ((*str)[i] == 0x0D) {
+			str->erase(i, 1);
+			i--;
+		}
+	}
+}
+
