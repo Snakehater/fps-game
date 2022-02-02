@@ -2,6 +2,7 @@
 out vec4 FragColor;
 
 in vec2 TexCoord;
+in float TexId;
 in vec3 Color;
 
 // sampler2D holds texture id that we have assigned with glUniform1i and activated with glActiveTexture in main.cpp

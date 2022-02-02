@@ -44,17 +44,17 @@ public:
 				material.name = splitted[1];
 				materialStarted = true;
 			} else if (strcmp(key, "Ka") == 0) {
-				material.ambient_color.x = std::stof(splitted[1]);
-				material.ambient_color.y = std::stof(splitted[2]);
-				material.ambient_color.z = std::stof(splitted[3]);
+				material.ambient_color.x = std::stof(splitted[1]) * 255;
+				material.ambient_color.y = std::stof(splitted[2]) * 255;
+				material.ambient_color.z = std::stof(splitted[3]) * 255;
 			} else if (strcmp(key, "Kd") == 0) {
-				material.diffuse_color.x = std::stof(splitted[1]);
-				material.diffuse_color.y = std::stof(splitted[2]);
-				material.diffuse_color.z = std::stof(splitted[3]);
+				material.diffuse_color.x = std::stof(splitted[1]) * 255;
+				material.diffuse_color.y = std::stof(splitted[2]) * 255;
+				material.diffuse_color.z = std::stof(splitted[3]) * 255;
 			} else if (strcmp(key, "Ks") == 0) {
-				material.specular_color.x = std::stof(splitted[1]);
-				material.specular_color.y = std::stof(splitted[2]);
-				material.specular_color.z = std::stof(splitted[3]);
+				material.specular_color.x = std::stof(splitted[1]) * 255;
+				material.specular_color.y = std::stof(splitted[2]) * 255;
+				material.specular_color.z = std::stof(splitted[3]) * 255;
 			} else if (strcmp(key, "Ns") == 0) {
 				material.specular_weight = std::stof(splitted[1]);
 			} else if (strcmp(key, "d") == 0)

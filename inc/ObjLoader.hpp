@@ -155,10 +155,13 @@ public:
 					uc = failsafe;
 				// load data into output  -- each stride consists of 8 floats, x y z u v r g b, is the format, vertex three, textcoord 2 and color 3
 				vertex_buffer.push_back(va.x); vertex_buffer.push_back(va.y); vertex_buffer.push_back(va.z); vertex_buffer.push_back(ua.u); vertex_buffer.push_back(ua.v);
+					vertex_buffer.push_back(material_counter);
 					materialLib.push_mtl(&vertex_buffer);
 				vertex_buffer.push_back(vb.x); vertex_buffer.push_back(vb.y); vertex_buffer.push_back(vb.z); vertex_buffer.push_back(ub.u); vertex_buffer.push_back(ub.v);
+					vertex_buffer.push_back(material_counter);
 					materialLib.push_mtl(&vertex_buffer);
 				vertex_buffer.push_back(vc.x); vertex_buffer.push_back(vc.y); vertex_buffer.push_back(vc.z); vertex_buffer.push_back(uc.u); vertex_buffer.push_back(uc.v);
+					vertex_buffer.push_back(material_counter);
 					materialLib.push_mtl(&vertex_buffer);
 			}
 		}
