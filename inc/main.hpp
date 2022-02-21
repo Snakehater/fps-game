@@ -17,14 +17,14 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+#define STB_IMAGE_IMPLEMENTATION // only import relevant stuff from stb_image.h
+#include "stb_image.h"
+
+#include <chrono>
+
 #include "shader.hpp"
 #include "camera.hpp"
 #include "mesh.hpp"
 #include "VecUtils.hpp"
 #include "CollisionUtils.hpp"
 #include "ObjLoader.hpp"
-
-#define STB_IMAGE_IMPLEMENTATION // only import relevant stuff from stb_image.h
-#include "stb_image.h"
-
-#include <chrono>

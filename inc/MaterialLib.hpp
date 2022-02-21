@@ -14,8 +14,9 @@ class MaterialLib
 	void _removeCarriage(std::string *str);
 public:
 	std::vector<Material> materials;
-	Material selected;
-	bool available;
+	Material selected_m;
+	bool selected;
+	long unsigned int selected_idx;
 	MaterialLib(void){};
 	void load(const char *filename){
 		// Creating reader with display of length 100 (100 #'s)
@@ -65,26 +66,38 @@ public:
 		infile.drawbar();
 	};
 	void select(const char *selector) {
+		long unsigned int i = 0;
 		for (Material m : materials) {
 			if (strcmp(m.name.c_str(), selector) == 0) {
-				this->selected = m;
-				this->available = true;
+				this->selected_m = m;
+				this->selected_idx = i;
+				this->selected = true;
 				return;
 			}
+			i++;
 		}
-		this->available = false;
+		this->selected = false;
+	}
+	void select(long unsigned int selector) {
+		if (materials.size() > selector) {
+			this->selected_m = materials[selector];
+			this->selected_idx = selector;
+			this->selected = true;
+			return;
+		}
+		this->selected = false;
 	}
 	void push_mtl(std::vector<float>* output) {
-		if (!this->available) {
+		if (!this->selected) {
 			output->push_back(255.0f);
 			output->push_back(255.0f);
 			output->push_back(255.0f);
 			return;
 		}
 
-		output->push_back(this->selected.ambient_color.x);
-		output->push_back(this->selected.ambient_color.y);
-		output->push_back(this->selected.ambient_color.z);
+		output->push_back(this->selected_m.ambient_color.x);
+		output->push_back(this->selected_m.ambient_color.y);
+		output->push_back(this->selected_m.ambient_color.z);
 	}
 
 };

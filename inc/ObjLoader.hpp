@@ -43,6 +43,41 @@ class ObjLoader
 	}
 public:
 
+	struct TEXTURE {
+		int width, height, nrChannels;
+		unsigned char *data;
+	};
+	
+	std::vector<struct TEXTURE> textures;
+	void loadTextures(void) {
+		// load and create a texture
+		// -------------------------
+		unsigned int texture1;
+		glGenTextures( 1, &texture1 );
+		glBindTexture( GL_TEXTURE_2D, texture1 );
+		// set the texture wrapping parameters
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+		// set texture filtering parameters
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+		// load image, create texture and generate mipmap
+		//stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+		int width, height, nrChannels;
+		unsigned char *data = stbi_load( "res/textures/textureatlas.jpg", &width, &height, &nrChannels, 0);
+
+		if ( data ) {
+			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data );
+			glGenerateMipmap( GL_TEXTURE_2D );
+		} else
+			std::cout << "ERROR::LOAD::TEXTURE" << std::endl;
+
+		//stbi_image_free( data );
+	}
+	void freeTextures(void) {
+		
+	}
+
 	ObjLoader(const char *filename, std::vector<Mesh> *mesh_vector, float scale = 1.0f, int* vertices_size = NULL, int* stride_offset_var_counter = NULL, int* arr_offset_cnt = NULL) {
 
 		std::string object_name = "";
@@ -78,9 +113,14 @@ public:
 					material_buffer.clear();
 					material_counter = 0;
 					num_of_vertices = 0;
-					object_name = splitted[1];
-				} else
-					object_name = splitted[1];
+				}
+				/* Sometimes the object name might have a space in it, therefore, remake the name */
+				object_name = "";
+				for (long unsigned int i = 1; i < splitted.size(); i++) {
+					if (i != 1)
+						object_name += "_";
+					object_name += splitted[i];
+				}
 			} else if (strcmp(ctrl_id, "mtllib") == 0) {
 				std::cout << '\r';
 
@@ -101,10 +141,30 @@ public:
 				materialLib.load(lib_path.c_str());
 			} else if (strcmp(ctrl_id, "usemtl") == 0) {
 				materialLib.select(splitted[1].c_str());
-				if (materialLib.available) {
-					material_buffer.push_back(materialLib.selected);
-					material_counter++;
-				}
+				
+				/* Failsafe material_counter, it should be changed so this is a failsafe */
+				material_counter = 0;
+
+				/* Check if material exists */
+				if (materialLib.selected) {
+					/* Check if material already is added to buffer */
+					bool contains_mat = false;
+					for (unsigned long int i = 0; i < material_buffer.size(); i++) {
+						/* Check if any element matches selected material, then change material_counter to the index of the matched element */
+						if (material_buffer[i].name == materialLib.selected_m.name) {
+							material_counter = i;
+							contains_mat = true;
+							break;
+						}
+					}
+					/* If previous for loop doesn't find the material in the buffer, add it */
+					if (!contains_mat) {
+						/* Add to buffer and set material_counter */
+						material_buffer.push_back(materialLib.selected_m);
+						material_counter = material_buffer.size() - 1;
+					}
+				} else
+					material_counter = -1;
 			} else if (strcmp(ctrl_id, "v") == 0) {
 				vertex v;
 				std::vector<std::string> vertex_raw = this->split(tmp, " ");
