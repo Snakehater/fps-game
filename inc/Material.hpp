@@ -17,6 +17,7 @@ public:
 	glm::vec3 specular_color;
 	float specular_weight;
 	float transparency;
+	std::string ambient_map;
 	
 	Material(void){
 		name = "";
@@ -25,6 +26,7 @@ public:
 		specular_color = glm::vec3(255,255,255);
 		specular_weight = 1.0f;
 		transparency = 1.0f;
+		ambient_map = "";
 	};
 };
 #endif

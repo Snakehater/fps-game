@@ -42,40 +42,58 @@ class ObjLoader
 		return output;
 	}
 public:
-
+	MaterialLib materialLib;
 	struct TEXTURE {
 		int width, height, nrChannels;
 		unsigned char *data;
+		char *path;
 	};
-	
-	std::vector<struct TEXTURE> textures;
+	std::vector<struct TEXTURE*> textures;
+
 	void loadTextures(void) {
-		// load and create a texture
-		// -------------------------
-		unsigned int texture1;
-		glGenTextures( 1, &texture1 );
-		glBindTexture( GL_TEXTURE_2D, texture1 );
-		// set the texture wrapping parameters
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
-		// set texture filtering parameters
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-		glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-		// load image, create texture and generate mipmap
-		//stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-		int width, height, nrChannels;
-		unsigned char *data = stbi_load( "res/textures/textureatlas.jpg", &width, &height, &nrChannels, 0);
+		std::cout << "Size: " << this->materialLib.materials.size() << std::endl;
+		for (Material m : this->materialLib.materials) {
+			// init
+			struct TEXTURE *t = (struct TEXTURE*)malloc(sizeof(struct TEXTURE));
+			t->data = NULL;
+			t->path = (char*)malloc(sizeof(char) * (m.ambient_map.length() + 1)); // add one to include \0 character
+			strcpy(t->path, m.ambient_map.c_str());
+			
+			// load and create a texture # this should be moved to when I make use of the textures
+			// -------------------------
+			/*unsigned int texture1;
+			glGenTextures( 1, &texture1 );
+			glBindTexture( GL_TEXTURE_2D, texture1 );
+			// set the texture wrapping parameters
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
+			// set texture filtering parameters
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );*/
 
-		if ( data ) {
-			glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data );
-			glGenerateMipmap( GL_TEXTURE_2D );
-		} else
-			std::cout << "ERROR::LOAD::TEXTURE" << std::endl;
-
-		//stbi_image_free( data );
+			// load image, create texture and generate mipmap
+			//stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
+			t->data = stbi_load( t->path, &t->width, &t->height, &t->nrChannels, 0);
+			/*
+			if ( data ) {
+				glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, t->width, t->height, 0, GL_RGB, GL_UNSIGNED_BYTE, data );
+				glGenerateMipmap( GL_TEXTURE_2D );
+			} else
+				std::cout << "ERROR::LOAD::TEXTURE" << std::endl; */
+			textures.push_back(t);
+		}
 	}
 	void freeTextures(void) {
-		
+		std::cout << "texture free shit" << std::endl;
+		for (struct TEXTURE *texture : textures) {
+			if (texture->data != NULL)
+				stbi_image_free(texture->data);
+			delete texture;
+		}
+	}
+
+	~ObjLoader() {
+		freeTextures();
 	}
 
 	ObjLoader(const char *filename, std::vector<Mesh> *mesh_vector, float scale = 1.0f, int* vertices_size = NULL, int* stride_offset_var_counter = NULL, int* arr_offset_cnt = NULL) {
@@ -96,7 +114,6 @@ public:
 			std::cout << "ERROR::OBJLOADER::LOAD_FILE" << std::endl;
 			return;
 		}
-		MaterialLib materialLib;
 
 		while(std::getline(infile, tmp)) {
 			infile.drawbar();
@@ -138,20 +155,20 @@ public:
 				lib_path += lib_fname;
 
 				/* Load the file */
-				materialLib.load(lib_path.c_str());
+				this->materialLib.load(lib_path.c_str());
 			} else if (strcmp(ctrl_id, "usemtl") == 0) {
-				materialLib.select(splitted[1].c_str());
+				this->materialLib.select(splitted[1].c_str());
 				
 				/* Failsafe material_counter, it should be changed so this is a failsafe */
 				material_counter = 0;
 
 				/* Check if material exists */
-				if (materialLib.selected) {
+				if (this->materialLib.selected) {
 					/* Check if material already is added to buffer */
 					bool contains_mat = false;
 					for (unsigned long int i = 0; i < material_buffer.size(); i++) {
 						/* Check if any element matches selected material, then change material_counter to the index of the matched element */
-						if (material_buffer[i].name == materialLib.selected_m.name) {
+						if (material_buffer[i].name == this->materialLib.selected_m.name) {
 							material_counter = i;
 							contains_mat = true;
 							break;
@@ -160,7 +177,7 @@ public:
 					/* If previous for loop doesn't find the material in the buffer, add it */
 					if (!contains_mat) {
 						/* Add to buffer and set material_counter */
-						material_buffer.push_back(materialLib.selected_m);
+						material_buffer.push_back(this->materialLib.selected_m);
 						material_counter = material_buffer.size() - 1;
 					}
 				} else
@@ -216,13 +233,13 @@ public:
 				// load data into output  -- each stride consists of 8 floats, x y z u v r g b, is the format, vertex three, textcoord 2 and color 3
 				vertex_buffer.push_back(va.x); vertex_buffer.push_back(va.y); vertex_buffer.push_back(va.z); vertex_buffer.push_back(ua.u); vertex_buffer.push_back(ua.v);
 					vertex_buffer.push_back(material_counter);
-					materialLib.push_mtl(&vertex_buffer);
+					this->materialLib.push_mtl(&vertex_buffer);
 				vertex_buffer.push_back(vb.x); vertex_buffer.push_back(vb.y); vertex_buffer.push_back(vb.z); vertex_buffer.push_back(ub.u); vertex_buffer.push_back(ub.v);
 					vertex_buffer.push_back(material_counter);
-					materialLib.push_mtl(&vertex_buffer);
+					this->materialLib.push_mtl(&vertex_buffer);
 				vertex_buffer.push_back(vc.x); vertex_buffer.push_back(vc.y); vertex_buffer.push_back(vc.z); vertex_buffer.push_back(uc.u); vertex_buffer.push_back(uc.v);
 					vertex_buffer.push_back(material_counter);
-					materialLib.push_mtl(&vertex_buffer);
+					this->materialLib.push_mtl(&vertex_buffer);
 			}
 		}
 		// above code will only create a new mesh when obj file states a new object, therefore, we need to add the last mesh manually:

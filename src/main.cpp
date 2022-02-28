@@ -42,17 +42,7 @@ int main() {
 
 //	Mesh plane_mesh("res/objects/map.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
 	ObjLoader map("res/objects/map.obj", &objects, 1.0f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
-	//	  map.loapTextures();
-
-	return 0;
-
-	// std::cout << map.textures.size() << std::endl;
-	for (Material m : objects[1509].materials) {
-		std::cout << m.name << std::endl;
-	}
-	std::cout << objects[1509].name << std::endl;
-	
-	return 0;
+		map.loadTextures();
 
 	/* Add meshes to collision system */
 //	collisionSystem.push_back(&plane_mesh);
@@ -225,31 +215,14 @@ int main() {
 		glBindVertexArray( VAO );
 		
 		// calculate the model matrix for each object and pass it to shader before drawing
-		int max_size = 0;
-		Mesh maxm;
-		signed int idx = -1;
-		signed int idxx = -1;
 		for (Mesh m : objects) {
-			idx++;
-			std::cout << "Drawing " << m.name << " " << m.materials.size() << std::endl;
-			if (max_size < m.materials.size()) {
-				max_size = m.materials.size();
-				maxm = m;
-				idxx = idx;
-			}
 			glm::mat4 model = glm::mat4( 1.0f );
 			model = glm::translate(model, m.get_position());
 			model = glm::rotate( model, glm::radians(m.rotation_degree), m.get_rotation_vec() );
 			ourShader.setMat4( "model", model );
 			glDrawArrays( GL_TRIANGLES, m.stride_offset(), m.vert_num());
 		}
-		std::cout << "idx " << idxx << std::endl;
-		std::cout << "Max: " << max_size << std::endl;
-		std::cout << maxm.name << std::endl;
-		/*std::cout << "######55######" << std::endl;
-		for (Material m : maxm.materials)
-			std::cout << m.name << std::endl;
-*/
+
 		// glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
 		// -------------------------------------------------------------------------------
 		glfwSwapBuffers(window); 
