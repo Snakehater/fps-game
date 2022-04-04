@@ -45,7 +45,10 @@ int main() {
 		map.loadTextures();
 
 	/* Add meshes to collision system */
-//	collisionSystem.push_back(&plane_mesh);
+	for (long unsigned int i = 0; i < objects.size(); i++) {
+		Mesh *m = &objects[i];
+		collisionSystem.push_back(m);
+	}
 
 	/* Model loading should now be done */
 
@@ -136,6 +139,8 @@ int main() {
 
 	// load and create a texture
 	// -------------------------
+	map.applyTextures(ourShader);
+	/*
 	unsigned int texture1;
 	glGenTextures( 1, &texture1 );
 	glBindTexture( GL_TEXTURE_2D, texture1 );
@@ -148,7 +153,8 @@ int main() {
 	// load image, create texture and generate mipmap
 	//stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
 	int width, height, nrChannels;
-	unsigned char *data = stbi_load( "res/textures/textureatlas.jpg", &width, &height, &nrChannels, 0);
+	//unsigned char *data = stbi_load( "res/textures/textureatlas.jpg", &width, &height, &nrChannels, 0);
+	unsigned char *data = stbi_load("res/objects/jpg/textures/tex-Asphalt010_Color-11495727939003393648.jpg", &width, &height, &nrChannels, 0);
 
 	if ( data ) {
 		glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data );
@@ -156,13 +162,22 @@ int main() {
 	} else
 		std::cout << "ERROR::LOAD::TEXTURE" << std::endl;
 
-	stbi_image_free( data );
+	stbi_image_free( data ); 
+	*/
 	
 	// tell opengl for each sample to which texture unit it belongs to ( only once )
 	// -----------------------------------------------------------------------------
-	ourShader.use();
-	glUniform1i( glGetUniformLocation( ourShader.ID, "texture1" ), 0 ); // 0 is our texture id, for another texture, use another id
-
+	// map.applyTextures(); // already done;
+	/* This is automated in map.applyTextures(); */
+	//ourShader.use();
+	//glUniform1i( glGetUniformLocation( ourShader.ID, "texture1" ), 0 ); // 0 is our texture id, for another texture, use another id
+	
+	std::cout << objects[0].name << std::endl;
+	std::cout << map.textures[0]->path << std::endl;
+	for (long unsigned int i = 0; i < 9; i++) {
+		std::cout << objects[0].vertex_array_object[i] << " ";
+	}
+	std::cout << std::endl;
 
 	// uncomment this call to draw in wireframe polygons.
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -188,8 +203,9 @@ int main() {
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 		// bind textures on corresponding texture units
-		glActiveTexture( GL_TEXTURE0 );
-		glBindTexture( GL_TEXTURE_2D, texture1 );
+		map.bindTextures();
+		//glActiveTexture(GL_TEXTURE0);
+		//glBindTexture(GL_TEXTURE_2D, texture1);
 		
 		// Going 3d with our object
 		// ------------------------
@@ -229,7 +245,7 @@ int main() {
 		glfwPollEvents();
 		
 //		auto start = std::chrono::high_resolution_clock::now();
-		//updateGravity();
+		updateGravity();
 /*		auto stop = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
 		std::cout << std::endl << "time:" << std::endl;

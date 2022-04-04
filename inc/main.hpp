@@ -1,3 +1,5 @@
+#define MAX_TEXTURES 128
+
 #include <iostream>
 #include <fstream>
 #include <string>

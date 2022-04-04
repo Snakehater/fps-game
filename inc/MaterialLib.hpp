@@ -60,8 +60,10 @@ public:
 				material.specular_weight = std::stof(splitted[1]);
 			} else if (strcmp(key, "d") == 0) {
 				material.transparency = std::stof(splitted[1]);
-			} else if (strcmp(key, "map_Ka") == 0)
-				material.ambient_map = splitted[splitted.size() - 1]; // NB! additional texture options is removed
+			} else if (strcmp(key, "map_Ka") == 0) {
+				material.ambient_map = "res/objects/jpg/" + splitted[splitted.size() - 1]; // NB! additional texture options is removed
+				material.ambient_map.replace(material.ambient_map.length() - 3, 3, "jpg"); // replace png with jpg, our loader only supports jpg
+			}
 		}
 		if (materialStarted) 
 			materials.push_back(material);

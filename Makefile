@@ -8,7 +8,7 @@ BUILD_DIR=_build
 # compiler flags:
 # -g     -for adding debugging information to the executable file
 # -wall  -for turning on most compiler warnings
-CFLAGS = -g -Wall -fsanitize=address -fsanitize=undefined
+CFLAGS = -g -Wall
 
 # linker flags:
 LFLAGS  = -I/opt/x11/include 

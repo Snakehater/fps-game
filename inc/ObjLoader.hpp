@@ -47,40 +47,67 @@ public:
 		int width, height, nrChannels;
 		unsigned char *data;
 		char *path;
+		unsigned int texture_int;
 	};
 	std::vector<struct TEXTURE*> textures;
 
 	void loadTextures(void) {
 		std::cout << "Size: " << this->materialLib.materials.size() << std::endl;
-		for (Material m : this->materialLib.materials) {
+		std::cout << "Loading textures" << std::endl;
+		for (long unsigned int i = 0; i < this->materialLib.materials.size(); i++) {
+			Material m = this->materialLib.materials[i];
 			// init
 			struct TEXTURE *t = (struct TEXTURE*)malloc(sizeof(struct TEXTURE));
 			t->data = NULL;
 			t->path = (char*)malloc(sizeof(char) * (m.ambient_map.length() + 1)); // add one to include \0 character
+			t->texture_int = 0;
 			strcpy(t->path, m.ambient_map.c_str());
 			
-			// load and create a texture # this should be moved to when I make use of the textures
-			// -------------------------
-			/*unsigned int texture1;
-			glGenTextures( 1, &texture1 );
-			glBindTexture( GL_TEXTURE_2D, texture1 );
+			t->data = stbi_load( t->path, &t->width, &t->height, &t->nrChannels, 0);
+			textures.push_back(t);
+
+			std::cout << '\r';
+			std::cout << i << "/" << this->materialLib.materials.size();
+			std::cout.flush(); // see wintermute's comment
+		}
+	}
+	void applyTextures(Shader ourShader) {
+		for (long unsigned int i = 0; i < textures.size(); i++) {
+			struct TEXTURE *t = textures[i];
+			glGenTextures( 1, &t->texture_int );
+			glBindTexture( GL_TEXTURE_2D, t->texture_int );
 			// set the texture wrapping parameters
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT );
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT );
 			// set texture filtering parameters
 			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
-			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );*/
-
+			glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
 			// load image, create texture and generate mipmap
 			//stbi_set_flip_vertically_on_load(true); // tell stb_image.h to flip loaded texture's on the y-axis.
-			t->data = stbi_load( t->path, &t->width, &t->height, &t->nrChannels, 0);
-			/*
-			if ( data ) {
-				glTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, t->width, t->height, 0, GL_RGB, GL_UNSIGNED_BYTE, data );
-				glGenerateMipmap( GL_TEXTURE_2D );
+
+			if (t->data) {
+				glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, t->width, t->height, 0, GL_RGB, GL_UNSIGNED_BYTE, t->data);
+				glGenerateMipmap(GL_TEXTURE_2D);
 			} else
-				std::cout << "ERROR::LOAD::TEXTURE" << std::endl; */
-			textures.push_back(t);
+				std::cout << "ERROR::LOAD::TEXTURE " << t->path << " " << i << std::endl;
+		}
+		return;
+		/* This could be optimized by moving this to the above loop but we'll separate for simplicity for now */
+		GLint gl_textures[MAX_TEXTURES];
+		ourShader.use();
+		for (long unsigned int i = 0; i < textures.size() && i < MAX_TEXTURES; i++) {
+			gl_textures[i] = i;
+
+			// set texture unit as a uniform for the fragment shader, could be set by ourShader.setInt()
+			glUniform1i(glGetUniformLocation(ourShader.ID, "texture" + (1 + i)), i); // 'i' is our texture id, for another texture, use another id
+		}
+		// set texture units as a uniform for the fragment shader
+		glUniform1iv(glGetUniformLocation(ourShader.ID, "textures"), MAX_TEXTURES, gl_textures);
+	}
+	void bindTextures(void) {
+		for (long unsigned int i = 0; i < textures.size() - 11; i++) {
+			glActiveTexture(GL_TEXTURE0 + i);
+			glBindTexture(GL_TEXTURE_2D, textures[i+11]->texture_int);
 		}
 	}
 	void freeTextures(void) {
