@@ -11,6 +11,10 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 void processInput(GLFWwindow *window);
 int  get_mesh_offset(int* mesh_offsets, int target);
 void updateGravity(void);
+void gravity_thread(int nan);
+
+// globals
+GLFWwindow* window;
 
 // camera
 Camera camera(glm::vec3(0, 22.0f, 0), glm::vec3(0.0f, 2.0f, 0.0f), YAW, -89.9f);
@@ -42,7 +46,7 @@ int main() {
 
 //	Mesh plane_mesh("res/objects/map.obj", 0.5f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
 	ObjLoader map("res/objects/map.obj", &objects, 1.0f, &vertices_size, &stride_offset_counter, &arr_offset_cnt);
-		map.loadTextures();
+	//	map.loadTextures();
 
 	/* Add meshes to collision system */
 	for (long unsigned int i = 0; i < objects.size(); i++) {
@@ -67,7 +71,7 @@ int main() {
 	std::cout << glfwGetVersionString() << std::endl;
 
 	// create a window object
-	GLFWwindow* window = glfwCreateWindow(800, 600, "FPS", glfwGetPrimaryMonitor(), NULL);
+	window = glfwCreateWindow(800, 600, "FPS", glfwGetPrimaryMonitor(), NULL);
 	if (window == NULL) {
 	    std::cout << "Failed to create GLFW window" << std::endl;
 	    glfwTerminate();
@@ -139,7 +143,7 @@ int main() {
 
 	// load and create a texture
 	// -------------------------
-	map.applyTextures(ourShader);
+	//map.applyTextures(ourShader);
 	/*
 	unsigned int texture1;
 	glGenTextures( 1, &texture1 );
@@ -173,7 +177,7 @@ int main() {
 	//glUniform1i( glGetUniformLocation( ourShader.ID, "texture1" ), 0 ); // 0 is our texture id, for another texture, use another id
 	
 	std::cout << objects[0].name << std::endl;
-	std::cout << map.textures[0]->path << std::endl;
+	//std::cout << map.textures[0]->path << std::endl;
 	for (long unsigned int i = 0; i < 9; i++) {
 		std::cout << objects[0].vertex_array_object[i] << " ";
 	}
@@ -181,6 +185,9 @@ int main() {
 
 	// uncomment this call to draw in wireframe polygons.
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	// Start thread
+	std::thread thread_obj(gravity_thread, 0);
 
 	// render loop
 	// -----------
@@ -203,7 +210,7 @@ int main() {
 		glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
 		// bind textures on corresponding texture units
-		map.bindTextures();
+		//map.bindTextures();
 		//glActiveTexture(GL_TEXTURE0);
 		//glBindTexture(GL_TEXTURE_2D, texture1);
 		
@@ -245,7 +252,7 @@ int main() {
 		glfwPollEvents();
 		
 //		auto start = std::chrono::high_resolution_clock::now();
-		updateGravity();
+		//updateGravity();
 /*		auto stop = std::chrono::high_resolution_clock::now();
 		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(stop - start);
 		std::cout << std::endl << "time:" << std::endl;
@@ -257,6 +264,14 @@ int main() {
 	}
 	glfwTerminate(); // delete all of GLFW's resources that were allocated
 	return 0;
+}
+
+void gravity_thread(int nan) {
+	std::cout << "Thread called" << std::endl;
+	while (!glfwWindowShouldClose(window)) {
+		updateGravity();
+		std::this_thread::sleep_for(std::chrono::milliseconds(1));
+	}
 }
 
 #define FEET_COL_DIST 2 // distance from player to feet for collision system

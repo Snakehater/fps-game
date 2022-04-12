@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 #include <unistd.h>
+#include <thread>
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
